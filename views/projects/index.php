@@ -1,0 +1,22 @@
+<?php $this->layout('layouts/public', ['title' => 'প্রজেক্ট']); ?>
+<section class="projects-index">
+    <h1>প্রজেক্ট</h1>
+    <p>পোর্টফোলিও-স্টাইল ক্যাপস্টোন প্রজেক্ট — নিজে বানান, লিংক জমা দিন, Admin রিভিউ করবে। কিছু প্রজেক্ট একাধিক ভাষা মিলিয়ে (hybrid) — সবগুলো ভাষা সম্পূর্ণ করলেই জমা দেওয়া যাবে।</p>
+    <div class="track-grid">
+        <?php foreach ($projects as $p): ?>
+            <?php $isReady = $eligibility[$p['id']] ?? false; ?>
+            <a class="track-card project-card <?= $isReady ? 'is-ready' : 'is-locked' ?>" href="<?= e(url('/projects/' . $p['id'])) ?>">
+                <h2><?= e($p['title_bn']) ?></h2>
+                <p class="track-en"><?= e($p['title_en']) ?></p>
+                <div class="language-chips">
+                    <?php foreach ($languagesByProject[$p['id']] ?? [] as $lang): ?>
+                        <span class="language-chip"><?= e($lang['name_bn']) ?></span>
+                    <?php endforeach; ?>
+                </div>
+                <p class="readiness-badge <?= $isReady ? 'is-ready' : 'is-locked' ?>">
+                    <?= $isReady ? '✓ Ready' : '🔒 Recommended: finish the language(s) above first' ?>
+                </p>
+            </a>
+        <?php endforeach; ?>
+    </div>
+</section>

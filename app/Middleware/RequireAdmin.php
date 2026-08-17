@@ -1,0 +1,19 @@
+<?php
+declare(strict_types=1);
+
+namespace App\Middleware;
+
+use App\Core\Request;
+use App\Core\Response;
+use App\Core\Session;
+
+final class RequireAdmin implements Middleware
+{
+    public function handle(Request $request, callable $next): Response
+    {
+        if (Session::adminUserId() === null) {
+            return Response::redirect(url('/admin/login'));
+        }
+        return $next($request);
+    }
+}
