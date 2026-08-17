@@ -709,7 +709,7 @@ pre.stderr { color: var(--danger); }
     .site-main, .status-badge, .track-card, .skill-node, .lesson-locked-card,
     .lesson-completed-badge, .recommendation-card, .status-passed, .test-result,
     .leaderboard-list li, .discussion-post, .landing-hero, .landing-cta,
-    .subscribe-box, .notice, .stat-tile, .dashboard-tree-card {
+    .subscribe-box, .notice, .stat-tile, .dashboard-tree-card, .quiz-result-banner {
         animation: none !important;
     }
     .btn, .track-card, .daily-challenge-card, .stat-tile, a, input, select, textarea {
@@ -718,4 +718,26 @@ pre.stderr { color: var(--danger); }
     .btn:hover, .track-card:hover, .daily-challenge-card:hover, .stat-tile:hover { transform: none !important; }
     .skill-icon-partial { animation: none; }
     .submission-page[data-pending="1"] #poll-hint::before { animation-duration: 1.4s; }
+}
+
+/* Reduced transparency: the nav is the app's one translucent material —
+   go solid instead of blurred when the user has asked for less transparency. */
+@media (prefers-reduced-transparency: reduce) {
+    .site-nav {
+        background: var(--bg-primary);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
+
+/* Higher contrast: near-solid surfaces with a defined border, instead of the
+   subtle hairlines/tints used by default. */
+@media (prefers-contrast: more) {
+    :root { --border: #6E7681; --text-muted: #B1BAC4; }
+    .site-nav { background: var(--bg-primary); backdrop-filter: none; -webkit-backdrop-filter: none; }
+    .btn { border: 1px solid currentColor; }
+    .skill-node-link:focus-visible,
+    a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+        outline-width: 3px;
+    }
 }

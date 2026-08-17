@@ -19,11 +19,6 @@ return [
         ],
 
         'otp_bypass_code' => env('OTP_BYPASS_CODE', ''),
-
-        'mail' => [
-            'from_address'          => env('MAIL_FROM_ADDRESS', 'no-reply@bytewise.example'),
-            'contact_notify_email'  => env('CONTACT_INBOX_NOTIFY_EMAIL', ''),
-        ],
     ],
 
     'db' => [

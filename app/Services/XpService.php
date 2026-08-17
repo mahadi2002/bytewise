@@ -14,12 +14,11 @@ final class XpService
      */
     public static function award(int $userId, string $sourceType, int $sourceId, int $amount): int
     {
-        $repo = new XpLedgerRepository();
-        if ($repo->alreadyAwarded($userId, $sourceType, $sourceId)) {
+        $awarded = (new XpLedgerRepository())->addOnce($userId, $sourceType, $sourceId, $amount);
+        if (!$awarded) {
             return 0;
         }
 
-        $repo->add($userId, $sourceType, $sourceId, $amount);
         StreakService::recordActivity($userId);
 
         return $amount;

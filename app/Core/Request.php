@@ -90,19 +90,6 @@ final class Request
         return is_numeric($v) ? (int) $v : $default;
     }
 
-    /** @return string[] */
-    public function arr(string $key): array
-    {
-        $v = $this->input($key, []);
-        if (!is_array($v)) {
-            return [];
-        }
-        return array_values(array_filter(array_map(
-            static fn($x) => is_scalar($x) ? (string) $x : null,
-            $v
-        )));
-    }
-
     public function file(string $key): ?array
     {
         $f = $this->files[$key] ?? null;

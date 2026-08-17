@@ -76,6 +76,31 @@ final class LessonController extends Controller
     }
 
     /**
+     * Shared by complete() and submitQuiz(): resolve the lesson + its
+     * module, 404 on a missing/unpublished lesson, redirect if the track
+     * is locked. Returns the resolved pair, or a Response the caller must
+     * return immediately (the lock-redirect case).
+     *
+     * @return array{lesson: array, module: array}|Response
+     */
+    private function resolveGatedLesson(int $lessonId, int $userId): array|Response
+    {
+        $lesson = (new LessonRepository())->find($lessonId);
+        if ($lesson === null || !$lesson['is_published']) {
+            $this->notFound();
+        }
+
+        $module = (new ModuleRepository())->find((int) $lesson['module_id']);
+        $access = TrackAccessService::check((int) $module['language_id'], $userId);
+        if (!$access['unlocked']) {
+            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
+            return $this->redirect(url('/dashboard'));
+        }
+
+        return ['lesson' => $lesson, 'module' => $module];
+    }
+
+    /**
      * POST /lessons/{id}/complete — [G][P] the actual "move forward" action.
      * Teaching here is meant to be gentle, not gated: a lesson is marked
      * done and the learner advances regardless of whether they ever touched
@@ -87,21 +112,15 @@ final class LessonController extends Controller
         $lessonId = (int) $id;
         $userId   = (int) $this->currentUserId();
 
-        $lessonRepo = new LessonRepository();
-        $lesson     = $lessonRepo->find($lessonId);
-        if ($lesson === null) {
-            $this->notFound();
+        $resolved = $this->resolveGatedLesson($lessonId, $userId);
+        if ($resolved instanceof Response) {
+            return $resolved;
         }
-
-        $module = (new ModuleRepository())->find((int) $lesson['module_id']);
-        $access = TrackAccessService::check((int) $module['language_id'], $userId);
-        if (!$access['unlocked']) {
-            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
-            return $this->redirect(url('/dashboard'));
-        }
+        ['lesson' => $lesson, 'module' => $module] = $resolved;
 
         (new UserLessonProgressRepository())->markCompleted($userId, $lessonId);
 
+        $lessonRepo = new LessonRepository();
         $nextLesson = $lessonRepo->nextInModule((int) $module['id'], (int) $lesson['sort_order']);
         if ($nextLesson !== null) {
             return $this->redirect(url('/lessons/' . $nextLesson['id']));
@@ -124,19 +143,12 @@ final class LessonController extends Controller
         $lessonId = (int) $id;
         $userId   = (int) $this->currentUserId();
 
-        $lessonRepo = new LessonRepository();
-        $lesson     = $lessonRepo->find($lessonId);
-        if ($lesson === null) {
-            $this->notFound();
+        $resolved = $this->resolveGatedLesson($lessonId, $userId);
+        if ($resolved instanceof Response) {
+            return $resolved;
         }
-
-        $module   = (new ModuleRepository())->find((int) $lesson['module_id']);
+        ['lesson' => $lesson, 'module' => $module] = $resolved;
         $language = (new LanguageRepository())->find((int) $module['language_id']);
-        $access   = TrackAccessService::check((int) $module['language_id'], $userId);
-        if (!$access['unlocked']) {
-            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
-            return $this->redirect(url('/dashboard'));
-        }
 
         $qRepo     = new QuizQuestionRepository();
         $correct   = $qRepo->correctOptionsForLesson($lessonId);

@@ -175,3 +175,32 @@ standalone (`php database/scripts/create_admin.php <email> <password>`),
 deliberately NOT part of the `--seed` auto-glob (see that script's own
 docblock: it expects CLI args that `--seed`'s no-argument auto-require
 wouldn't supply, which would abort the whole seed run).
+
+## 011_xp_ledger_uniqueness.sql
+
+`xp_ledger` gets `UNIQUE(user_id, source_type, source_id)`. Found by
+`/code-review`: `XpService::award()` was a check-then-insert
+(`alreadyAwarded()` then `add()`) with nothing at the DB level backing the
+"once per source" guarantee, so two concurrent requests for the same
+lesson's quiz (double-click, two tabs) could both pass the check before
+either row existed and both get paid. `XpLedgerRepository::addOnce()` now
+attempts the insert directly and treats a duplicate-key error (SQLSTATE
+`23000`) as "already awarded" — verified by firing 5 concurrent identical
+`/lessons/{id}/quiz` submissions: 5 `quiz_attempts` rows (every attempt is
+still logged) but exactly 1 `xp_ledger` row and 10 XP total, not 50. Safe
+for existing usage: every current `XpService::award()` call site
+(`'quiz'`, `'problem'`, `'project'`) always passes a concrete `source_id`;
+`'daily_challenge'`/`'streak_bonus'` are unused so far (TODO.md), so the
+NULL-distinctness quirk of MySQL unique indexes never comes into play yet.
+
+Same review also found `LessonController::complete()`/`submitQuiz()` using
+`LessonRepository::find()`, which — unlike `findForViewer()` and
+`nextInModule()` — doesn't filter `is_published`. (Left as-is on purpose:
+`find()` is also what the admin edit-lesson form uses to load drafts, so
+the fix is an explicit `is_published` check at the two student-facing call
+sites, not a filter on the shared method.) An unpublished lesson's `done`
+count wasn't excluded from `UserLessonProgressRepository::moduleCounts()`
+either, so completing one could push `done` past the published-only
+`total` and permanently block that module from ever showing 100% (no
+admin "un-complete" exists) — fixed by 404ing on an unpublished lesson in
+both actions before anything is written.
