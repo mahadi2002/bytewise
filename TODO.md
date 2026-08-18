@@ -14,29 +14,31 @@ context on each (source: `C:\Users\mahad\Downloads\03-ENV-AND-CONFIG.md`).
       before launch — prefixes can change.
 - [ ] BLOCKER-4: VAT/SD/SC wording verification against current
       BDApps-mandated tax copy.
-- [x] BLOCKER-5a (lessons — DONE): Every module in all 8 tracks now has real,
-      original lessons with a code sample and a 1-question quiz each — **63
-      modules, 257 lessons, 257 quiz questions, 1028 options** across the
-      whole app, every question has an `explanation_bn`. The old "every
-      module has exactly 4 lessons, every track has exactly 6 modules" cap
-      was an artificial early-build simplification, not a real constraint —
-      removed. Module/lesson counts now vary by how much a topic genuinely
-      needs (Python: 9 modules/37 lessons; Data Structures: 7/28), grounded
-      in GfG/W3Schools' real per-language structure (see
-      `docs/CONTENT-PLAN.md` "Curriculum expansion" section for the full
-      per-track rationale — new modules for Error/Exception Handling, File
-      Handling, and language-specific practical containers like Java's
-      Collections Framework and C++'s STL, which GfG/W3Schools all cover and
-      the original 6-module cap had silently excluded). Authored in
-      `database/seeds/004`, `006`–`022` (one file per track/expansion +
-      two explanation backfills + one module-structure file), following the
-      pattern in `docs/CONTENT-PLAN.md`. Verified: DB-level integrity checks
+- [x] BLOCKER-5a (lessons — DONE, 3 expansion rounds): Every module in all 8
+      tracks now has real, original lessons with a code sample and a
+      1-question quiz each — **73 modules, 298 lessons, 298 quiz questions,
+      1192 options** across the whole app, every question has an
+      `explanation_bn`. The old "every module has exactly 4 lessons, every
+      track has exactly 6 modules" cap was an artificial early-build
+      simplification, not a real constraint — removed across rounds 2-3.
+      Module/lesson counts now vary by how much a topic genuinely needs
+      (Python: 10 modules/42 lessons; Data Structures: 8/32), grounded in
+      GfG/W3Schools' real per-language structure (see `docs/CONTENT-PLAN.md`
+      "Curriculum expansion" sections for the full per-track rationale, 3
+      rounds: Error/Exception Handling + File Handling + language-specific
+      containers like Java Collections/C++ STL, then a deeper tier —
+      Enums/Unions, Dynamic Memory Management, Generics, Iterators/Lambda/
+      Comprehensions, DOM Basics, ES6+ Features, Stored Procedures, AVL
+      Trees, Backtracking). Authored in `database/seeds/004`, `006`–`030`
+      (one file per track/expansion round + explanation backfills + two
+      module-structure files), following the pattern in
+      `docs/CONTENT-PLAN.md`. Verified: DB-level integrity checks
       (every module has ≥1 lesson, every lesson exactly 1 quiz question with
       exactly 4 options and exactly 1 correct answer, zero missing
       explanations, zero UTF-8 corruption) and a full live run — every one
-      of C's 32 lessons (now 8 modules, including the 2 brand-new ones)
-      completed via the real HTTP endpoint, C reached 100%, and C++
-      auto-unlocked with its own 2 new modules visible on the skill tree.
+      of C's 40 lessons (now 10 modules) completed via the real HTTP
+      endpoint, C reached 100%, and C++ auto-unlocked with its own new
+      modules visible on the skill tree.
       Every seeded row still has `content_verified = 0` — genuinely new
       content should be reviewed by someone with subject-matter expertise
       per language before being marketed as expert-reviewed, but the

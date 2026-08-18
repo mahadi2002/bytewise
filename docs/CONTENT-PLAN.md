@@ -205,19 +205,56 @@ last), just without forcing a fixed count anywhere — Python ended up with
 9 modules because it had three genuine gaps (errors, files, modules),
 while C only needed two.
 
+## Curriculum expansion, round 3 — deepening further
+
+Requested explicitly as "no skipping, no narrowing down," matching
+GfG/W3Schools/Programiz as closely as a *teaching* curriculum reasonably
+can. Two things stayed true from round 2 and matter more here: (1) no text,
+code, or exercises are copied from those sites — only topic coverage and
+structure are studied, all lesson content stays original; (2) reference-
+manual pages (keyword lists, method indexes, environment setup) and
+adjacent-subject material those sites bundle in (NumPy/Pandas/Matplotlib/ML
+under "Python," jQuery/AJAX under "JavaScript," Threads/Sockets/I/O Streams
+under "Java") aren't lesson-shaped content or even the same subject as the
+language itself, so they're deliberately not chased.
+
+What round 3 added, one more module per track built from the next tier of
+real per-language gaps identified by re-reading each site's full chapter
+list (W3Schools nav trees for C/C++/Java/Python/JavaScript/SQL, GfG's
+"User Defined Data Types"/"Memory Management" sections for C, W3Schools'
+Python DSA page for AVL trees):
+
+| Track | New module(s) | Expanded existing module |
+|---|---|---|
+| C | Enums & Unions, Dynamic Memory Management | — |
+| C++ | Enums & Namespaces | — |
+| Java | Enum & Generics | — |
+| Python | Iterators, Lambda & Comprehensions | OOP: +Polymorphism & Encapsulation (4→5) |
+| JavaScript | DOM Basics, ES6+ Features (destructuring/spread/modules) | — |
+| SQL | CASE, NULL Functions & Stored Procedures | — |
+| Data Structures | AVL Trees & Balancing | — |
+| Algorithms | Backtracking | — |
+
 **Final shape — no track forced to match another:**
 
 | Track | Modules | Lessons | Quizzes |
 |---|---|---|---|
-| C | 8 | 32 | 32 |
-| C++ | 8 | 34 | 34 |
-| Java | 8 | 33 | 33 |
-| Python | 9 | 37 | 37 |
-| JavaScript | 8 | 33 | 33 |
-| SQL | 8 | 32 | 32 |
-| Data Structures | 7 | 28 | 28 |
-| Algorithms | 7 | 28 | 28 |
-| **Total** | **63** | **257** | **257** |
+| C | 10 | 40 | 40 |
+| C++ | 9 | 38 | 38 |
+| Java | 9 | 37 | 37 |
+| Python | 10 | 42 | 42 |
+| JavaScript | 10 | 41 | 41 |
+| SQL | 9 | 36 | 36 |
+| Data Structures | 8 | 32 | 32 |
+| Algorithms | 8 | 32 | 32 |
+| **Total** | **73** | **298** | **298** |
+
+Verified the same way as rounds 1-2: DB integrity (every module ≥1 lesson,
+every lesson exactly 1 quiz with exactly 4 options and 1 correct answer,
+zero missing explanations, zero UTF-8 corruption) plus a full live run —
+logged in as a fresh subscriber, completed all 40 of C's lessons (now 10
+modules) via the real `/lessons/{id}/complete` endpoint, watched C reach
+100% and C++ auto-unlock showing its own new module on the skill tree.
 
 C++/Java/Python/JavaScript/SQL each got 3 new lessons finishing their
 Basics module plus 4 lessons in each of the other 5 modules (round 1). Data
