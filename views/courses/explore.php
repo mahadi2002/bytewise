@@ -1,7 +1,7 @@
 <?php $this->layout('layouts/public', ['title' => 'ট্র্যাক এক্সপ্লোর করুন']); ?>
 <section class="explore-index">
     <h1>ট্র্যাক এক্সপ্লোর করুন</h1>
-    <p>C দিয়ে শুরু করে C++, Java, Python, JavaScript, SQL, তারপর Data Structures ও Algorithms — ৮টি ট্র্যাক, নির্দিষ্ট ক্রমে আনলক হয়।</p>
+    <p>C, C++, Java, Python, JavaScript, SQL, Data Structures ও Algorithms — ৮টি ট্র্যাক, যেকোনোটি দিয়ে শুরু করা যায়, কোনো প্রি-রিকুইজিট ছাড়াই।</p>
 
     <div class="track-grid">
         <?php foreach ($languages as $lang): ?>

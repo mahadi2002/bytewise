@@ -49,15 +49,15 @@ rate-limited action in the app follows this same one-call-site pattern
 
 | Method | Path | Middleware | Notes |
 |---|---|---|---|
-| GET | `/courses/{track}` | auth, sub | Real skill tree, sequential unlock; **plus a `TrackAccessService` check** — redirects to `/dashboard` if the track itself is locked (chain/any-language rule, see FEATURES.md). Each unlocked module node links to `/courses/{track}/{module_slug}` |
-| GET | `/courses/{track}/{module_slug}` | auth, sub | Lesson list for one module (status icon + link to `/lessons/{id}` per lesson); re-derives the module's own lock state from the skill tree and redirects to `/courses/{track}` with a notice if it's locked — the page the skill tree previously had no way to reach |
-| GET | `/lessons/{id}` | auth, sub | Marks `in_progress`; same `TrackAccessService` check as courses |
+| GET | `/courses/{track}` | auth, sub | Real skill tree, no prerequisites — every track and module is reachable to any logged-in subscriber (see FEATURES.md, "Learning path & track gating"). Each module node links to `/courses/{track}/{module_slug}` |
+| GET | `/courses/{track}/{module_slug}` | auth, sub | Lesson list for one module (status icon + link to `/lessons/{id}` per lesson) |
+| GET | `/lessons/{id}` | auth, sub | Marks `in_progress` |
 | POST | `/lessons/{id}/complete` | auth, sub, csrf | The only place a lesson is marked `completed` — no quiz required. Advances to the next lesson, or back to the track page with a module-complete notice if it was the module's last lesson |
 | POST | `/lessons/{id}/quiz` | auth, sub, csrf | Optional bonus practice only — grades server-side, awards XP once on a fully-correct submission (tracked independently of completion status); never marks the lesson completed and never blocks `/complete` |
 | GET | `/cheatsheets/{track}/full` | auth, sub | |
-| GET | `/daily-challenge` | auth, sub | Card grid always shows all 8; clicking through to a locked track's problem redirects same as any other locked problem |
-| GET | `/problems/{id}` | auth, sub | Language picker for agnostic (DS/Algo) problems; `TrackAccessService::checkProblem()` resolves the owning language (direct or via lesson→module) and redirects if locked |
-| POST | `/problems/{id}/submit` | auth, sub, csrf | `language_id` validated server-side against `problems.language_id`; same track-lock check repeated here (defense in depth on the POST, not just the GET) |
+| GET | `/daily-challenge` | auth, sub | Card grid shows all 8 tracks, all reachable |
+| GET | `/problems/{id}` | auth, sub | Language picker for agnostic (DS/Algo) problems; `TrackAccessService::checkProblem()` resolves the owning language (direct or via lesson→module) |
+| POST | `/problems/{id}/submit` | auth, sub, csrf | `language_id` validated server-side against `problems.language_id` |
 | GET | `/submissions/{id}` | auth, sub | Poll endpoint (JSON via `Accept: application/json`) |
 | GET | `/projects`, `/projects/{id}` | auth, sub | Multi-language chips + readiness badge via `ProjectEligibilityService` |
 | POST | `/projects/{id}/submit` | auth, sub, csrf | Self-report link, admin-reviewed; **hard-gated 403** unless ALL of the project's required languages (`project_languages`) are 100% complete |

@@ -13,39 +13,43 @@ records where the built behavior diverges from the original spec text.
 | Real contact/support feature | `contact_messages` table + `/admin/contact-messages`, honeypot spam handling | Done |
 | Portfolio/capstone feature | Projects: self-reported link + admin review queue, XP on approve, hard-gated on required language(s) 100% complete | Done, verified end-to-end |
 
-## Learning path & track gating (added post-launch, see TODO.md)
+## Learning path & track gating (added post-launch, later reversed — see TODO.md)
 
 A workflow-architecture review (grounded against freeCodeCamp, The Odin
 Project, and CS50's actual live structure) found the original 8 tracks
 were flat and ungated — a brand-new subscriber could open any track or
 project regardless of progress, and the schema couldn't represent a
 project needing more than one language at all. Two product decisions
-(both explicit, not defaults) closed this:
+(both explicit, not defaults) closed this: a hard-gated chain
+(C → C++ → Java → Python → JavaScript → SQL, each requiring the previous
+100% complete) and a "Data Structures/Algorithms needs any one language
+100% complete" rule.
 
-- **Track chain, hard-gated**: C → C++ → Java → Python → JavaScript → SQL.
-  Each requires the previous 100% complete (`languages.prerequisite_language_id`).
-  This is a pedagogical ordering, not a technical one — nothing about
-  Python requires C — so it isn't extended to any other relationship
-  without the same explicit decision.
-- **Data Structures / Algorithms**: require ANY ONE real language track
-  100% complete (`languages.requires_any_language`) — their problems need
-  a language picked to solve in, so reaching them with zero languages
-  finished doesn't make sense.
+**This was later explicitly reversed** — product decision: every track
+and every module within a track is now freely reachable to any logged-in
+subscriber, no prerequisites at all. `TrackAccessService::check()` always
+returns `unlocked: true` for a logged-in user; `SkillTreeService::build()`
+no longer sequentially locks modules within a track. The schema columns
+(`languages.prerequisite_language_id`, `languages.requires_any_language`)
+still exist but are no longer read by any code — removing them would be a
+migration + FK teardown for no behavioral benefit, so they're left in
+place, inert.
+
+Still in effect, unaffected by the reversal:
 - **Hybrid projects**: `project_languages` (many-to-many) replaces the old
   single `projects.language_id`. A project can require more than one
   language; `ProjectEligibilityService` hard-gates the submission form
   until ALL required languages are 100% complete. One real example seeded
-  (`contact-book-cli`: Python + Data Structures).
-- **`TrackAccessService`** is the single source of truth for "is this
-  track's content reachable" — consulted by `CourseController`,
-  `LessonController` (show + quiz submit), `ProblemController`, and
-  `SubmissionController` (defense in depth on the POST, not just the GET).
-  A direct URL to a locked lesson or problem redirects to `/dashboard`
-  with an explanatory Bangla notice, same message everywhere.
-- Surfaced in the UI: `/dashboard` shows unlocked tracks first (not a
-  fixed id order) with a 🔒 + reason on locked ones; `/explore` shows the
-  same lock icons for a logged-in subscriber; project cards show
-  multi-language chips + a "Hybrid" badge + readiness state.
+  (`contact-book-cli`: Python + Data Structures). This is a *submission*
+  gate, not a *content-access* gate — unrelated to `TrackAccessService`.
+- **`TrackAccessService`** is still the single source of truth for track
+  access — consulted by `CourseController`, `LessonController` (show +
+  quiz submit), `ProblemController`, and `SubmissionController` — it just
+  no longer has any reason to say no to a logged-in user.
+- Surfaced in the UI: `/dashboard` and `/explore` no longer show 🔒 or
+  lock reasons for logged-in subscribers; every track/module renders its
+  real completion state (✓/%/not-started) regardless of any other
+  track/module's progress.
 
 ## Skill tree (signature UI element)
 

@@ -47,9 +47,10 @@ storage/conversion layer in this app.
   and Algorithms (`is_meta_track=1`, `judge_language_code NULL`,
   `chk_languages_judge_code` CHECK enforces this pairing).
   **`prerequisite_language_id`/`requires_any_language`** (added in
-  migration 009) enforce the learning-path order — see that migration's
-  own notes below; `TrackAccessService` is the only code that should ever
-  read these two columns.
+  migration 009) originally enforced the learning-path order — see that
+  migration's own notes below. **No longer read by any code** (product
+  decision reversed the hard-gate, all tracks are now prerequisite-free);
+  left in the schema rather than torn out via a migration for no benefit.
 - **modules**, **lessons** — `lessons.body_md`/`code_sample` are the GATED
   columns: `LessonRepository::findForViewer()` must exclude them from the
   SELECT entirely for non-subscribers on non-free-preview lessons, not just
@@ -124,6 +125,9 @@ Added after the initial 15-phase build, when a workflow-architecture
 review found two real gaps: the schema couldn't represent a project
 needing more than one language, and nothing gated track content on
 prior-track completion despite the landing copy implying a learning order.
+**The prerequisite half was later explicitly reversed** — see the note
+below and FEATURES.md, "Learning path & track gating" — but the columns
+and this history are kept documented since the schema still carries them.
 
 - **project_languages** (`project_id`, `language_id`, `is_primary`) — a
   many-to-many replacing the single `projects.language_id` FK. A project
@@ -131,21 +135,22 @@ prior-track completion despite the landing copy implying a learning order.
   Structures). `is_primary` only drives card display order, never a
   gating distinction; `ProjectEligibilityService` requires ALL listed
   languages at 100% complete before the submission form unlocks.
-- **languages.prerequisite_language_id** (self-FK) — enforces
+- **languages.prerequisite_language_id** (self-FK) — originally enforced
   C → C++ → Java → Python → JavaScript → SQL: each of the last 5 requires
-  the previous 100% complete. This is a **pedagogical** ordering decision,
-  not a technical dependency (nothing about Python requires C) — a
-  deliberate product choice, not something to extend by inventing further
-  prerequisites without the same explicit decision.
-- **languages.requires_any_language** — set on Data Structures and
-  Algorithms: their content requires ANY ONE real language track 100%
-  complete (their problems need a language picked to solve in, per
-  BUILD-SPEC §9 — you can't pick a language you don't have).
-- Both columns are read ONLY by `App\Services\TrackAccessService` — every
-  other call site (`CourseController`, `LessonController`,
-  `ProblemController`, `SubmissionController`) delegates to it rather than
-  re-deriving the rule, so the two rule shapes stay defined in exactly one
-  place.
+  the previous 100% complete. This was a **pedagogical** ordering decision,
+  not a technical dependency (nothing about Python requires C).
+- **languages.requires_any_language** — originally set on Data Structures
+  and Algorithms: their content required ANY ONE real language track 100%
+  complete.
+- **Reversed (product decision):** every track and every module is now
+  freely reachable to any logged-in subscriber, no prerequisites.
+  `TrackAccessService::check()` always returns `unlocked: true` for a
+  logged-in user and no longer reads either column;
+  `SkillTreeService::build()` no longer sequentially locks modules within
+  a track either. `CourseController`, `LessonController`,
+  `ProblemController`, and `SubmissionController` still delegate to
+  `TrackAccessService` (still the one place the rule is defined), it just
+  never says no to a logged-in user anymore.
 
 ## Seed content scope
 `database/seeds/content.sql` (from `02-SCHEMA-SEED.sql`) is a **structural

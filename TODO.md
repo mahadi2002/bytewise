@@ -103,6 +103,16 @@ flat/ungated and the schema couldn't represent a multi-language project.
 Two explicit product decisions: hard-gate (not soft-recommend), and
 enforce the full C→...→SQL chain (not just the DS/Algorithms rule).
 
+**Reversed (later product decision):** every track and every module is
+now freely reachable to any logged-in subscriber, no prerequisites at
+all — see `app/Services/TrackAccessService.php`,
+`app/Services/SkillTreeService.php`, and FEATURES.md's "Learning path &
+track gating" section. The chain/any-language rules described in the
+items below are historical context for how the code got here, not the
+current behavior. The hybrid-project schema and gating
+(`project_languages`, `ProjectEligibilityService`) are unaffected — that's
+a submission gate, not a content-access gate.
+
 - [x] `project_languages` junction table (migration 009) — projects can
       now require more than one language; `projects.language_id` dropped.
 - [x] `languages.prerequisite_language_id`/`requires_any_language` +

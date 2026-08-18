@@ -5,31 +5,27 @@ namespace App\Services;
 
 use App\Core\Db;
 use App\Repositories\LanguageRepository;
-use App\Repositories\UserLessonProgressRepository;
 
 /**
  * Single source of truth for "is language X's content reachable for user
- * Y" — a track-level gate sitting ABOVE SkillTreeService's within-track
- * sequential module unlock. Two rule shapes, both product decisions, not
- * guessed at:
- *
- *  - The 6 real languages chain: C -> C++ -> Java -> Python -> JavaScript
- *    -> SQL. Each requires the previous at 100% complete
- *    (languages.prerequisite_language_id).
- *  - Data Structures / Algorithms require at least one real language
- *    track 100% complete (languages.requires_any_language) — their
- *    problems need a language picked to solve in (BUILD-SPEC §9), so
- *    reaching their lessons/problems before any language exists doesn't
- *    make sense.
+ * Y". Every track is now open to any subscriber, no prerequisites —
+ * product decision (explicitly reversing the earlier hard-gated chain:
+ * C -> C++ -> Java -> Python -> JavaScript -> SQL, and the DS/Algorithms
+ * "any one language" rule). `languages.prerequisite_language_id` /
+ * `requires_any_language` stay in the schema (harmless, and dropping them
+ * would mean a migration + FK teardown for no benefit) but are no longer
+ * read here. The auth check stays: an anonymous request still isn't
+ * "unlocked" by this method, though in practice `RequireSubscription`
+ * middleware already blocks it before this is ever consulted.
  *
  * Consulted by CourseController, LessonController, ProblemController, and
- * SubmissionController — every place a track's content (not just its
- * projects) is reachable. Project gating is a separate, stricter concern
- * (ProjectEligibilityService) built on the same 100%-complete signal.
+ * SubmissionController. Project gating is a separate, still-active concern
+ * (ProjectEligibilityService, hard-gated on 100%-complete languages) —
+ * unaffected by this change.
  */
 final class TrackAccessService
 {
-    /** @return array{unlocked: bool, reason: ?array} reason: ['language' => row, 'percent' => int] or ['any' => true] */
+    /** @return array{unlocked: bool, reason: ?array} */
     public static function check(int $languageId, ?int $userId): array
     {
         $language = (new LanguageRepository())->find($languageId);
@@ -38,18 +34,7 @@ final class TrackAccessService
         }
 
         if ($userId === null) {
-            // Visitor: content is gated by subscription first anyway (RequireSubscription
-            // middleware runs before this is ever consulted for a real request) — treat
-            // as locked so nothing downstream assumes access.
             return ['unlocked' => false, 'reason' => null];
-        }
-
-        if ((int) $language['requires_any_language'] === 1) {
-            return self::checkRequiresAny($userId);
-        }
-
-        if ($language['prerequisite_language_id'] !== null) {
-            return self::checkPrerequisite($userId, (int) $language['prerequisite_language_id']);
         }
 
         return ['unlocked' => true, 'reason' => null];
@@ -60,17 +45,10 @@ final class TrackAccessService
         return self::check($languageId, $userId)['unlocked'];
     }
 
-    /** Bangla, user-facing — same message everywhere a locked track redirects (courses/lessons/problems). */
+    /** Only reachable for the language-not-found/not-logged-in cases now — no prerequisite reasons exist anymore. */
     public static function lockMessage(?array $reason): string
     {
-        if ($reason === null) {
-            return 'এই ট্র্যাকটি এখনো লক করা আছে।';
-        }
-        if (!empty($reason['any'])) {
-            return 'এই ট্র্যাক শুরু করতে আগে অন্তত একটি ভাষা ট্র্যাক সম্পূর্ণ করুন — Data Structures/Algorithms-এর প্রবলেম সমাধান করতে একটি ভাষা প্রয়োজন।';
-        }
-        $lang = $reason['language'];
-        return "এই ট্র্যাকটি লক করা আছে — আগে {$lang['name_bn']} সম্পূর্ণ করুন ({$reason['percent']}% সম্পন্ন)।";
+        return 'This track is not available right now.';
     }
 
     /**
@@ -103,34 +81,5 @@ final class TrackAccessService
             return ['unlocked' => true, 'reason' => null];
         }
         return self::check($languageId, $userId);
-    }
-
-    private static function checkPrerequisite(int $userId, int $prerequisiteLanguageId): array
-    {
-        $prereq = (new LanguageRepository())->find($prerequisiteLanguageId);
-        [$total, $done] = (new UserLessonProgressRepository())->languageCounts($userId, $prerequisiteLanguageId);
-        $percent = $total > 0 ? (int) round(($done / $total) * 100) : 0;
-
-        if ($total > 0 && $done === $total) {
-            return ['unlocked' => true, 'reason' => null];
-        }
-
-        return ['unlocked' => false, 'reason' => ['language' => $prereq, 'percent' => $percent]];
-    }
-
-    private static function checkRequiresAny(int $userId): array
-    {
-        $progressRepo = new UserLessonProgressRepository();
-        foreach ((new LanguageRepository())->all() as $lang) {
-            if ((int) $lang['is_meta_track'] === 1) {
-                continue;
-            }
-            [$total, $done] = $progressRepo->languageCounts($userId, (int) $lang['id']);
-            if ($total > 0 && $done === $total) {
-                return ['unlocked' => true, 'reason' => null];
-            }
-        }
-
-        return ['unlocked' => false, 'reason' => ['any' => true]];
     }
 }

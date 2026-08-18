@@ -33,7 +33,7 @@
     <?php endif; ?>
 
     <h2>আমার স্কিল ট্রি</h2>
-    <p class="hint">ভাষাগুলো একটি নির্দিষ্ট ক্রমে আনলক হয় — C → C++ → Java → Python → JavaScript → SQL। Data Structures ও Algorithms শুরু করতে অন্তত একটি ভাষা সম্পূর্ণ করুন।</p>
+    <p class="hint">সব ভাষা ও প্রতিটি মডিউল যেকোনো সময় শুরু করা যায় — কোনো প্রি-রিকুইজিট নেই। যেখান থেকে ইচ্ছা সেখান থেকে শিখুন।</p>
     <div class="dashboard-trees">
         <?php foreach ($trees as $t): ?>
             <div class="dashboard-tree-card <?= $t['unlocked'] ? '' : 'is-track-locked' ?>">

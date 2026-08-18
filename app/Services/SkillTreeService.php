@@ -7,15 +7,17 @@ use App\Repositories\ModuleRepository;
 use App\Repositories\UserLessonProgressRepository;
 
 /**
- * Computes per-module ✓/%/🔒 for one track, per BUILD-SPEC §4. Sequential,
- * computed at render time from user_lesson_progress — no stored
- * is_unlocked column anywhere (§9's deliberate "don't cache derived state"
- * decision, same principle as never session-caching subscription status).
+ * Computes per-module ✓/%/🔒 for one track — no prerequisites (product
+ * decision: every module in an unlocked track is freely reachable,
+ * regardless of any other module's progress). Computed at render time from
+ * user_lesson_progress — no stored is_unlocked column anywhere (§9's
+ * deliberate "don't cache derived state" decision).
  *
  * Rendering rule: a module is 'complete' when every lesson in it is
- * completed; 'locked' when the PREVIOUS module (by sort_order) is not yet
- * fully complete; otherwise 'partial' with a rounded percent — or
- * 'not_started' at 0%.
+ * completed, 'partial' with a rounded percent if some are, otherwise
+ * 'not_started'. 'locked' still exists as a state for a logged-out visitor
+ * (the free teaser view) — that's a subscription concern, not a
+ * prerequisite, and is unaffected by this.
  */
 final class SkillTreeService
 {
@@ -29,7 +31,6 @@ final class SkillTreeService
         $progressRepo = new UserLessonProgressRepository();
 
         $tree = [];
-        $previousComplete = true; // first module is always unlockable
 
         foreach ($modules as $module) {
             $moduleId = (int) $module['id'];
@@ -44,13 +45,6 @@ final class SkillTreeService
             $percent = $total > 0 ? (int) round(($done / $total) * 100) : 0;
             $isComplete = $total > 0 && $done === $total;
 
-            if (!$previousComplete) {
-                $tree[] = ['module' => $module, 'state' => 'locked', 'percent' => 0];
-                // A locked module's own completion never unlocks the next one.
-                $previousComplete = false;
-                continue;
-            }
-
             $state = match (true) {
                 $isComplete   => 'complete',
                 $done > 0     => 'partial',
@@ -58,7 +52,6 @@ final class SkillTreeService
             };
 
             $tree[] = ['module' => $module, 'state' => $state, 'percent' => $percent];
-            $previousComplete = $isComplete;
         }
 
         return $tree;
