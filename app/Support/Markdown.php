@@ -19,6 +19,17 @@ final class Markdown
             return '';
         }
 
+        // A handful of seed rows (all 4 projects' rubric_md/brief_md, one
+        // lesson body_md) were authored with a literal backslash-n escape
+        // sequence instead of a real newline byte — plain SQL string
+        // literals don't interpret \n, only E'' strings do. The paragraph
+        // split and nl2br() below only recognize real newlines, so those
+        // rows rendered as a literal "\n" in the page instead of a line
+        // break. Normalize both representations up front; no legitimate
+        // lesson/problem/project content ever needs a literal backslash-n
+        // in its rendered output.
+        $md = str_replace('\\n', "\n", $md);
+
         $escaped = e($md);
 
         // Inline code: `code`

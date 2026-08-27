@@ -7,8 +7,8 @@ namespace App\Core;
  * Rule-based validation with Bangla messages.
  *
  *   $v = Validator::make($request->body(), [
- *       'mobile_number' => 'required|msisdn',
- *   ], ['mobile_number' => 'মোবাইল নম্বর']);
+ *       'email' => 'required|email',
+ *   ], ['email' => 'ইমেইল']);
  *
  * Raw $_POST / $_GET is never used without passing through here.
  */
@@ -80,8 +80,8 @@ final class Validator
         $str   = is_scalar($value) ? (string) $value : '';
 
         return match ($rule) {
-            'msisdn' => preg_match('/^01[68][0-9]{8}$/', $str) === 1
-                ?: $this->fail($field, 'শুধু Robi (018) ও Airtel (016) নম্বর সাপোর্টেড।'),
+            'email' => filter_var($str, FILTER_VALIDATE_EMAIL) !== false && mb_strlen($str, 'UTF-8') <= 191
+                ?: $this->fail($field, 'সঠিক ইমেইল ঠিকানা দিন।'),
 
             'int' => preg_match('/^-?[0-9]{1,15}$/', $str) === 1
                 ?: $this->fail($field, $label . ' একটি সংখ্যা হতে হবে।'),
@@ -140,7 +140,7 @@ final class Validator
     }
 
     /** Flash errors + old input so the form can be re-rendered populated. */
-    public function flash(array $exceptKeys = ['_token', 'password']): void
+    public function flash(array $exceptKeys = ['_token', 'password', 'password_confirmation']): void
     {
         Session::flash('_errors', $this->errors);
         Session::flash('_old', array_diff_key($this->data, array_flip($exceptKeys)));

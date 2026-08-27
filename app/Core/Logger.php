@@ -8,19 +8,12 @@ use Throwable;
 /**
  * Daily rotating file logger.
  *
- * NEVER log: a full mobile number, an OTP code, a session id, a submission's
- * raw source code, or APP_KEY/HASH_PEPPER — a log file is the easiest place
- * for a secret to leak.
+ * NEVER log: a password, a password-reset token, a session id, a
+ * submission's raw source code, or APP_KEY/HASH_PEPPER — a log file is the
+ * easiest place for a secret to leak.
  */
 final class Logger
 {
-    private const LEVELS = ['debug' => 10, 'info' => 20, 'warning' => 30, 'error' => 40];
-
-    public static function debug(string $message, array $context = []): void
-    {
-        self::write('debug', $message, $context);
-    }
-
     public static function info(string $message, array $context = []): void
     {
         self::write('info', $message, $context);
@@ -44,7 +37,7 @@ final class Logger
         ]);
     }
 
-    /** MockSubscriptionGateway/MockExecutionGateway write dev-only detail here. */
+    /** MockExecutionGateway writes dev-only detail here. */
     public static function channel(string $channel, string $message): void
     {
         self::append($channel, date('c') . ' ' . $message . PHP_EOL);
@@ -52,11 +45,6 @@ final class Logger
 
     private static function write(string $level, string $message, array $context): void
     {
-        $min = self::LEVELS['info'] ?? 20;
-        if ((self::LEVELS[$level] ?? 20) < $min) {
-            return;
-        }
-
         $line = sprintf(
             '[%s] %s: %s %s%s',
             date('c'),
@@ -71,7 +59,7 @@ final class Logger
 
     private static function scrub(array $context): array
     {
-        $blocked = ['mobile_number', 'msisdn', 'phone', 'otp', 'otp_code', 'password',
+        $blocked = ['password', 'password_confirmation',
             'app_key', 'hash_pepper', 'secret', 'token', 'source_code', 'totp_secret'];
 
         foreach ($context as $key => $value) {

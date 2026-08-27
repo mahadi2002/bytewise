@@ -72,34 +72,6 @@ if (!function_exists('bn_num')) {
     }
 }
 
-if (!function_exists('bn_date')) {
-    /**
-     * Format a DATETIME/DATE column in Bangla digits. Storage is Asia/Dhaka
-     * wall-clock time (the migration session sets time_zone='+06:00', see
-     * 02-SCHEMA.sql), so no UTC conversion happens here — this reads the
-     * stored value as-is, unlike apps that store UTC and convert at render.
-     */
-    function bn_date(?string $datetime, bool $withTime = false): string
-    {
-        if (!$datetime) {
-            return '—';
-        }
-        $ts = strtotime($datetime);
-        if ($ts === false) {
-            return '—';
-        }
-        $months = [
-            1 => 'জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন',
-            'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর',
-        ];
-        $out = bn_num(date('d', $ts)) . ' ' . $months[(int) date('n', $ts)] . ' ' . bn_num(date('Y', $ts));
-        if ($withTime) {
-            $out .= ', ' . bn_num(date('h:i', $ts)) . ' ' . (date('a', $ts) === 'am' ? 'পূর্বাহ্ণ' : 'অপরাহ্ণ');
-        }
-        return $out;
-    }
-}
-
 if (!function_exists('old')) {
     /** Re-populate a form field after a validation failure. */
     function old(string $key, string $default = ''): string
@@ -145,42 +117,3 @@ if (!function_exists('str_excerpt')) {
     }
 }
 
-if (!function_exists('mask_msisdn')) {
-    /** 01712345678 -> 017XXXXX78 — the only form a mobile number takes in admin list views. */
-    function mask_msisdn(string $msisdn): string
-    {
-        if (strlen($msisdn) !== 11) {
-            return $msisdn;
-        }
-        return substr($msisdn, 0, 3) . 'XXXXX' . substr($msisdn, -2);
-    }
-}
-
-if (!function_exists('price_line')) {
-    /**
-     * Single source of truth for every price-disclosure string in the app —
-     * see BUILD-SPEC §9. $variant: 'short' (header CTA) | 'full' (everywhere else).
-     */
-    function price_line(string $variant = 'full'): string
-    {
-        $amount = number_format((float) config('gateway.daily_amount', 2.78), 2);
-        return $variant === 'short'
-            ? 'মাত্র ৳' . $amount . '/day'
-            : 'Daily ৳' . $amount . ' (Incl. VAT, SD & SC) মাত্র';
-    }
-}
-
-if (!function_exists('dd')) {
-    function dd(mixed ...$vars): never
-    {
-        if (!config('app.debug')) {
-            http_response_code(500);
-            exit;
-        }
-        header('Content-Type: text/plain; charset=utf-8');
-        foreach ($vars as $v) {
-            var_dump($v);
-        }
-        exit;
-    }
-}

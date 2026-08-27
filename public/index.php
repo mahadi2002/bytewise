@@ -13,6 +13,7 @@ define('APP_ROOT', dirname(__DIR__));
 
 require APP_ROOT . '/app/bootstrap.php';
 
+use App\Core\Csp;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
@@ -28,6 +29,7 @@ try {
 
     View::share('currentPath', $request->path);
     View::share('notice', Session::notice());
+    View::share('cspNonce', Csp::nonce());
 
     $router   = new Router(require APP_ROOT . '/app/routes.php');
     $response = $router->dispatch($request);
@@ -46,7 +48,7 @@ try {
 }
 
 // SecurityHeaders is global — applied to every response, including errors.
-(new SecurityHeaders())->handle($request, static fn(): Response => $response)->send();
+(new SecurityHeaders(Csp::nonce()))->handle($request, static fn(): Response => $response)->send();
 
 /** Map an HTTP status onto its error view. */
 function renderError(int $status, string $message, array $context = []): Response

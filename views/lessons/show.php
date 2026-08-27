@@ -8,9 +8,13 @@
             <a href="<?= e(url('/#subscribe')) ?>" class="btn btn-accent">Subscribe করুন</a>
         </div>
     <?php else: ?>
+        <p class="content-meta">
+            <a href="<?= e(url('/discussion/lesson/' . $lesson['id'])) ?>" class="discussion-cta">💬 আলোচনা (<?= e((string) ($discussionCount ?? 0)) ?>)</a>
+        </p>
+
         <div class="lesson-body"><?= \App\Support\Markdown::toHtml($lesson['body_md']) ?></div>
         <?php if (!empty($lesson['code_sample'])): ?>
-            <pre class="code-sample"><code><?= e($lesson['code_sample']) ?></code></pre>
+            <pre class="code-sample" data-language="<?= e((string) ($lesson['code_sample_language'] ?? '')) ?>"><code><?= e($lesson['code_sample']) ?></code></pre>
         <?php endif; ?>
 
         <?php if ($completed ?? false): ?>

@@ -50,4 +50,30 @@
             requestAnimationFrame(tick);
         });
     }
+
+    // Landing-page "try before you subscribe" demo: types the code sample
+    // out once, then reveals its output — one authored focal moment, not a
+    // loop. Static markup already shows the finished code + output, so a
+    // failed script or reduced motion just leaves that default in place.
+    if (!reduceMotion) {
+        var demoCode = document.querySelector('[data-demo-code] code');
+        var demoOutput = document.querySelector('[data-demo-output]');
+        if (demoCode && demoOutput) {
+            var fullText = demoCode.textContent;
+            demoCode.textContent = '';
+            demoOutput.classList.add('is-hidden');
+
+            var i = 0;
+            var typeNext = function () {
+                if (i <= fullText.length) {
+                    demoCode.textContent = fullText.slice(0, i);
+                    i += 1;
+                    setTimeout(typeNext, 18);
+                } else {
+                    demoOutput.classList.remove('is-hidden');
+                }
+            };
+            setTimeout(typeNext, 500);
+        }
+    }
 })();

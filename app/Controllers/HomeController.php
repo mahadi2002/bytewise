@@ -17,7 +17,9 @@ final class HomeController extends Controller
             return $this->redirect(url('/dashboard'));
         }
 
-        return $this->view('landing/index');
+        return $this->view('landing/index', [
+            'extraScripts' => ['dist/editor.js'],
+        ]);
     }
 
     public function faq(Request $request): Response
@@ -39,7 +41,7 @@ final class HomeController extends Controller
     public function health(Request $request): Response
     {
         try {
-            $ok = Db::value('SELECT 1') === 1;
+            $ok = (int) Db::value('SELECT 1') === 1;
         } catch (\Throwable) {
             $ok = false;
         }

@@ -56,7 +56,7 @@ rate-limited action in the app follows this same one-call-site pattern
 | POST | `/lessons/{id}/quiz` | auth, sub, csrf | Optional bonus practice only — grades server-side, awards XP once on a fully-correct submission (tracked independently of completion status); never marks the lesson completed and never blocks `/complete` |
 | GET | `/cheatsheets/{track}/full` | auth, sub | |
 | GET | `/daily-challenge` | auth, sub | Card grid shows all 8 tracks, all reachable |
-| GET | `/problems/{id}` | auth, sub | Language picker for agnostic (DS/Algo) problems; `TrackAccessService::checkProblem()` resolves the owning language (direct or via lesson→module) |
+| GET | `/problems/{id}` | auth, sub | Language picker for agnostic (DS/Algo) problems; `TrackAccessService::isUnlocked()` gates on login status only |
 | POST | `/problems/{id}/submit` | auth, sub, csrf | `language_id` validated server-side against `problems.language_id` |
 | GET | `/submissions/{id}` | auth, sub | Poll endpoint (JSON via `Accept: application/json`) |
 | GET | `/projects`, `/projects/{id}` | auth, sub | Multi-language chips + readiness badge via `ProjectEligibilityService` |

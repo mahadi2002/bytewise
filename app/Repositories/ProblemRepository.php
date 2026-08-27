@@ -45,17 +45,41 @@ final class ProblemRepository
         );
     }
 
+    /** Unconditional lookup for the admin edit form — ignores is_published (same convention as LessonRepository::find()). */
+    public function findAny(int $id): ?array
+    {
+        return Db::first('SELECT ' . self::FULL_COLUMNS . ' FROM problems WHERE id = ?', [$id]);
+    }
+
     public function create(array $data): int
     {
         return Db::insert(
             'INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
             [
-                $data['language_id'] ?: null, $data['lesson_id'] ?: null, $data['slug'], $data['title_bn'], $data['title_en'],
+                empty($data['language_id']) ? null : $data['language_id'], empty($data['lesson_id']) ? null : $data['lesson_id'], $data['slug'], $data['title_bn'], $data['title_en'],
                 $data['statement_md'], $data['starter_code'] ?? null, $data['difficulty'] ?? 'easy',
                 $data['xp_reward'] ?? 25, $data['time_limit_ms'] ?? 2000, $data['memory_limit_kb'] ?? 65536,
             ]
         );
+    }
+
+    /** language_id/lesson_id/slug not editable here — same convention as LessonRepository::update(). */
+    public function update(int $id, array $data): void
+    {
+        Db::exec(
+            'UPDATE problems SET title_bn = ?, title_en = ?, statement_md = ?, starter_code = ?, difficulty = ?, xp_reward = ?, time_limit_ms = ?, memory_limit_kb = ?, is_published = ? WHERE id = ?',
+            [
+                $data['title_bn'], $data['title_en'], $data['statement_md'], $data['starter_code'] ?? null,
+                $data['difficulty'] ?? 'easy', $data['xp_reward'] ?? 25, $data['time_limit_ms'] ?? 2000,
+                $data['memory_limit_kb'] ?? 65536, $data['is_published'] ?? 1, $id,
+            ]
+        );
+    }
+
+    public function delete(int $id): void
+    {
+        Db::exec('DELETE FROM problems WHERE id = ?', [$id]);
     }
 
     public function randomDailyEligible(int $languageId, array $excludeIds): array

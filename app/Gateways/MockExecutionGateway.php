@@ -11,9 +11,8 @@ namespace App\Gateways;
  *
  * Since it genuinely cannot run the code, it can't judge real correctness.
  * Outcome is controllable via a fixture marker in the source, the same
- * pattern MockSubscriptionGateway's sibling apps use (a mobile-number
- * suffix convention) to get deterministic, testable behavior without a
- * real backend: a line containing exactly `// MOCK: fail` (or the
+ * kind of deterministic-without-a-real-backend convention sibling apps'
+ * mock gateways use: a line containing exactly `// MOCK: fail` (or the
  * language's line-comment equivalent — `#`/`--`) anywhere in the source
  * fails every test case; anything else passes every test case. State is
  * persisted to storage/mock_executions/<ref>.json so a later checkStatus()

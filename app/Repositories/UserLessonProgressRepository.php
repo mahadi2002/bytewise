@@ -47,6 +47,30 @@ final class UserLessonProgressRepository
         );
     }
 
+    /**
+     * "Continue where you left off" — the most recently touched lesson
+     * this user has started but not finished, across every track (no
+     * prerequisites in this app, so a user may be mid-way through several
+     * tracks at once; the most recently updated one wins). Joined up to
+     * language slug so the dashboard CTA can link straight to /lessons/{id}
+     * without a second round trip.
+     */
+    public function mostRecentIncomplete(int $userId): ?array
+    {
+        return Db::first(
+            "SELECT l.id AS lesson_id, l.title_bn AS lesson_title, m.id AS module_id, m.title_bn AS module_title,
+                    lang.id AS language_id, lang.slug AS language_slug, lang.name_bn AS language_name, ulp.updated_at
+             FROM user_lesson_progress ulp
+             JOIN lessons l ON l.id = ulp.lesson_id
+             JOIN modules m ON m.id = l.module_id
+             JOIN languages lang ON lang.id = m.language_id
+             WHERE ulp.user_id = ? AND ulp.status = 'in_progress' AND l.is_published = 1
+             ORDER BY ulp.updated_at DESC
+             LIMIT 1",
+            [$userId]
+        );
+    }
+
     /** [total, completed] lesson counts for a module — SkillTreeService's percent calc. */
     public function moduleCounts(int $userId, int $moduleId): array
     {

@@ -87,8 +87,9 @@ context on each (source: `C:\Users\mahad\Downloads\03-ENV-AND-CONFIG.md`).
 - [x] Phase 12 — Daily Challenge, Leaderboard, Discussion
 - [x] Phase 13 — Projects (Portfolio Capstones)
 - [x] Phase 14 — Admin CMS & Content Import (lessons: full CRUD + CSV import;
-      languages/modules/problems/projects: list + create only, edit/delete
-      documented as a follow-up)
+      languages/modules/problems/projects: now full create/edit/delete too,
+      following the same repository find()/update()/delete() +
+      editX/updateX/deleteX controller pattern lessons established)
 - [x] Phase 15 — Docs (7 files in docs/), Security Sweep, Launch Readiness.
       Fonts were a real gap (none existed) — fixed: 8 genuine self-hosted
       woff2 files downloaded (Hind Siliguri/Inter/JetBrains Mono, all OFL),

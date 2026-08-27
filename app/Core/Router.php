@@ -15,7 +15,6 @@ final class Router
     private const MIDDLEWARE = [
         'csrf'  => \App\Middleware\CsrfGuard::class,
         'auth'  => \App\Middleware\RequireAuth::class,
-        'sub'   => \App\Middleware\RequireSubscription::class,
         'admin' => \App\Middleware\RequireAdmin::class,
     ];
 
@@ -54,7 +53,7 @@ final class Router
         throw new HttpException(404);
     }
 
-    /** `/lessons/{id}` -> numeric; `/explore/{track}` -> slug; `/daily-challenge/{date}` -> date */
+    /** `/lessons/{id}` -> numeric; `/explore/{track}` -> slug; `/daily-challenge/{date}` -> date; `/reset-password/{token}` -> hex */
     private function compile(string $path): string
     {
         static $cache = [];
@@ -62,7 +61,7 @@ final class Router
             return $cache[$path];
         }
 
-        $parts = preg_split('/(\{(?:slug|id|date|track|context_type)\})/', $path, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [];
+        $parts = preg_split('/(\{(?:slug|id|date|track|context_type|token)\})/', $path, -1, PREG_SPLIT_DELIM_CAPTURE) ?: [];
         $regex = '';
         $i     = 0;
 
@@ -73,6 +72,7 @@ final class Router
                 '{id}'           => '(?P<p' . $i++ . '>\d{1,19})',
                 '{date}'         => '(?P<p' . $i++ . '>\d{4}-\d{2}-\d{2})',
                 '{context_type}' => '(?P<p' . $i++ . '>lesson|problem)',
+                '{token}'        => '(?P<p' . $i++ . '>[a-f0-9]{32,64})',
                 default          => preg_quote($part, '#'),
             };
         }

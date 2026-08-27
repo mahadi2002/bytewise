@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
-use App\Core\Crypto;
 use App\Core\Db;
 
 final class UserRepository
@@ -13,17 +12,27 @@ final class UserRepository
         return Db::first('SELECT * FROM users WHERE id = ?', [$id]);
     }
 
-    public function findByMobile(string $mobile): ?array
+    public function findByEmail(string $email): ?array
     {
-        return Db::first('SELECT * FROM users WHERE mobile_hash = ?', [Crypto::blindIndex($mobile)]);
+        return Db::first('SELECT * FROM users WHERE email = ?', [$email]);
     }
 
-    public function create(string $mobile, string $operator): int
+    public function emailExists(string $email): bool
+    {
+        return Db::value('SELECT 1 FROM users WHERE email = ?', [$email]) !== null;
+    }
+
+    public function create(string $email, string $passwordHash): int
     {
         return Db::insert(
-            'INSERT INTO users (mobile_encrypted, mobile_hash, operator, status) VALUES (?, ?, ?, ?)',
-            [Crypto::encrypt($mobile), Crypto::blindIndex($mobile), $operator, 'active']
+            'INSERT INTO users (email, password_hash, status) VALUES (?, ?, ?)',
+            [$email, $passwordHash, 'active']
         );
+    }
+
+    public function updatePassword(int $userId, string $passwordHash): void
+    {
+        Db::exec('UPDATE users SET password_hash = ? WHERE id = ?', [$passwordHash, $userId]);
     }
 
     public function touchLastSeen(int $userId): void
@@ -31,15 +40,9 @@ final class UserRepository
         Db::exec('UPDATE users SET last_seen_at = NOW() WHERE id = ?', [$userId]);
     }
 
-    /** Decrypted mobile number — call sites must be audit-logged (admin PII reveal, Phase 14). */
-    public function decryptedMobile(array $user): ?string
-    {
-        return Crypto::decrypt((string) $user['mobile_encrypted']);
-    }
-
-    /** Admin list view — never decrypts mobile_encrypted here; reveal is a separate, audit-logged action. */
+    /** Admin list view. */
     public function all(): array
     {
-        return Db::all('SELECT id, operator, display_name, status, created_at, last_seen_at FROM users ORDER BY created_at DESC');
+        return Db::all('SELECT id, email, display_name, status, created_at, last_seen_at FROM users ORDER BY created_at DESC');
     }
 }

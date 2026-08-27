@@ -7,6 +7,7 @@ use App\Core\Controller;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use App\Repositories\DiscussionPostRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\LessonRepository;
 use App\Repositories\ModuleRepository;
@@ -22,20 +23,23 @@ final class LessonController extends Controller
     public function showFree(Request $request, string $slug): Response
     {
         $repo   = new LessonRepository();
-        $lesson = $repo->findBySlugForViewer($slug, $this->isSubscribed());
+        $lesson = $repo->findBySlugForViewer($slug, $this->isAuthenticated());
 
         if ($lesson === null) {
             $this->notFound();
         }
 
         $isLocked = !array_key_exists('body_md', $lesson);
+        $discussionCount = $isLocked ? 0 : (new DiscussionPostRepository())->countForContext('lesson', (int) $lesson['id']);
 
         return $this->view('lessons/show', [
-            'title'    => $lesson['title_bn'],
-            'lesson'   => $lesson,
-            'locked'   => $isLocked,
-            'questions'=> [],
-            'completed'=> false,
+            'title'           => $lesson['title_bn'],
+            'lesson'          => $lesson,
+            'locked'          => $isLocked,
+            'questions'       => [],
+            'completed'       => false,
+            'discussionCount' => $discussionCount,
+            'extraScripts'    => ['dist/editor.js'],
         ]);
     }
 
@@ -44,7 +48,7 @@ final class LessonController extends Controller
     {
         $lessonId = (int) $id;
         $repo     = new LessonRepository();
-        $lesson   = $repo->findForViewer($lessonId, $this->isSubscribed());
+        $lesson   = $repo->findForViewer($lessonId, $this->isAuthenticated());
 
         if ($lesson === null || !array_key_exists('body_md', $lesson)) {
             $this->notFound();
@@ -53,9 +57,8 @@ final class LessonController extends Controller
         $module = (new ModuleRepository())->find((int) $lesson['module_id']);
         $userId = (int) $this->currentUserId();
 
-        $access = TrackAccessService::check((int) $module['language_id'], $userId);
-        if (!$access['unlocked']) {
-            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
+        if (!TrackAccessService::isUnlocked($userId)) {
+            Session::notify('info', 'This track is not available right now.');
             return $this->redirect(url('/dashboard'));
         }
 
@@ -65,13 +68,17 @@ final class LessonController extends Controller
             $progressRepo->markInProgress($userId, $lessonId);
         }
 
+        $discussionCount = (new DiscussionPostRepository())->countForContext('lesson', $lessonId);
+
         return $this->view('lessons/show', [
-            'title'     => $lesson['title_bn'],
-            'lesson'    => $lesson,
-            'locked'    => false,
-            'module'    => $module,
-            'questions' => (new QuizQuestionRepository())->forLesson($lessonId),
-            'completed' => $progress !== null && $progress['status'] === 'completed',
+            'title'           => $lesson['title_bn'],
+            'lesson'          => $lesson,
+            'locked'          => false,
+            'module'          => $module,
+            'questions'       => (new QuizQuestionRepository())->forLesson($lessonId),
+            'completed'       => $progress !== null && $progress['status'] === 'completed',
+            'discussionCount' => $discussionCount,
+            'extraScripts'    => ['dist/editor.js'],
         ]);
     }
 
@@ -91,9 +98,8 @@ final class LessonController extends Controller
         }
 
         $module = (new ModuleRepository())->find((int) $lesson['module_id']);
-        $access = TrackAccessService::check((int) $module['language_id'], $userId);
-        if (!$access['unlocked']) {
-            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
+        if (!TrackAccessService::isUnlocked($userId)) {
+            Session::notify('info', 'This track is not available right now.');
             return $this->redirect(url('/dashboard'));
         }
 

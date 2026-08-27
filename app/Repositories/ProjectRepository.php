@@ -93,4 +93,39 @@ final class ProjectRepository
             return $id;
         });
     }
+
+    /** Unconditional lookup for the admin edit form — ignores is_published (same convention as LessonRepository::find()). */
+    public function findAny(int $id): ?array
+    {
+        return Db::first('SELECT ' . self::FULL_COLUMNS . ' FROM projects WHERE id = ?', [$id]);
+    }
+
+    /** slug not editable here — same convention as LessonRepository::update(). Re-syncs project_languages wholesale, same shape as create(). */
+    public function update(int $id, array $data): void
+    {
+        $languageIds = array_values(array_filter(array_map('intval', (array) ($data['language_ids'] ?? []))));
+
+        Db::transaction(function () use ($id, $data, $languageIds): void {
+            Db::exec(
+                'UPDATE projects SET title_bn = ?, title_en = ?, brief_md = ?, rubric_md = ?, starter_repo_notes = ?, xp_reward = ?, is_published = ? WHERE id = ?',
+                [
+                    $data['title_bn'], $data['title_en'], $data['brief_md'], $data['rubric_md'],
+                    $data['starter_repo_notes'] ?? null, $data['xp_reward'] ?? 100, $data['is_published'] ?? 1, $id,
+                ]
+            );
+
+            Db::exec('DELETE FROM project_languages WHERE project_id = ?', [$id]);
+            foreach ($languageIds as $i => $languageId) {
+                Db::exec(
+                    'INSERT INTO project_languages (project_id, language_id, is_primary) VALUES (?, ?, ?)',
+                    [$id, $languageId, $i === 0 ? 1 : 0]
+                );
+            }
+        });
+    }
+
+    public function delete(int $id): void
+    {
+        Db::exec('DELETE FROM projects WHERE id = ?', [$id]);
+    }
 }

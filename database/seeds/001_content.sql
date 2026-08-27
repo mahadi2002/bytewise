@@ -557,24 +557,474 @@ INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_orde
 (@p_linsearch, 0, '4\n1 2 3 4\n10', '-1', 2),
 (@p_linsearch, 1, '3\n5 5 5\n5', '0', 3);
 
+-- =============================================================================
+-- Second content pass: 2-3 additional judge-graded problems per track (24
+-- total), on top of the one-per-track flagship set above. All lesson_id
+-- NULL — not tied to one specific lesson, same convention as the DS/Algo
+-- problems above; language_id set per track (NULL + language-agnostic for
+-- DS/Algo, same as max-in-array/linear-search). Picked to stay within
+-- concepts an early module or two would actually cover (control flow,
+-- arrays, basic OOP, basic SQL aggregates/joins) rather than reaching into
+-- the later modules that are titles-only so far — same content-integrity
+-- flag as the rest of this file (content_verified = 0).
+-- =============================================================================
+
+-- ---------------------------------------------------------------------------
+-- C — prime check, array sum, pointer swap
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_c, NULL, 'prime-check', 'মৌলিক সংখ্যা যাচাই', 'Prime Check',
+'একটি পূর্ণসংখ্যা `n` ইনপুট নিন। `n` মৌলিক সংখ্যা (prime) হলে `Prime` প্রিন্ট করুন, না হলে `Not Prime` প্রিন্ট করুন। `n <= 1` হলে সবসময় `Not Prime` ধরুন।',
+'#include <stdio.h>
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    // TODO: n মৌলিক সংখ্যা কিনা যাচাই করে Prime/Not Prime প্রিন্ট করুন
+    return 0;
+}',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_prime FROM problems WHERE slug = 'prime-check';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_prime, 0, '7', 'Prime', 1),
+(@p_prime, 0, '10', 'Not Prime', 2),
+(@p_prime, 1, '1', 'Not Prime', 3),
+(@p_prime, 1, '13', 'Prime', 4);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_c, NULL, 'array-sum', 'অ্যারের যোগফল', 'Sum of an Array',
+'প্রথমে একটি পূর্ণসংখ্যা `n` ইনপুট নিন, তারপর `n`টি পূর্ণসংখ্যা (স্পেস দিয়ে আলাদা, একই লাইনে)। সবগুলোর যোগফল প্রিন্ট করুন।',
+'#include <stdio.h>
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    // TODO: n টি সংখ্যা পড়ে যোগফল বের করে প্রিন্ট করুন
+    return 0;
+}',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_arrsum_c FROM problems WHERE slug = 'array-sum';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_arrsum_c, 0, '5\n1 2 3 4 5', '15', 1),
+(@p_arrsum_c, 0, '3\n-1 -2 -3', '-6', 2),
+(@p_arrsum_c, 1, '1\n100', '100', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_c, NULL, 'swap-with-pointers', 'পয়েন্টার দিয়ে সোয়াপ', 'Swap with Pointers',
+'দুটি পূর্ণসংখ্যা ইনপুট নিন (স্পেস দিয়ে আলাদা)। **পয়েন্টার ব্যবহার করে** একটি ফাংশনের মাধ্যমে সংখ্যা দুটি swap করুন, তারপর swap করা মান দুটি প্রিন্ট করুন (স্পেস দিয়ে আলাদা)।',
+'#include <stdio.h>
+
+void swap(int *a, int *b) {
+    // TODO: *a ও *b-এর মান অদল-বদল করুন
+}
+
+int main() {
+    int x, y;
+    scanf("%d %d", &x, &y);
+    swap(&x, &y);
+    printf("%d %d\n", x, y);
+    return 0;
+}',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_swap FROM problems WHERE slug = 'swap-with-pointers';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_swap, 0, '3 7', '7 3', 1),
+(@p_swap, 0, '10 20', '20 10', 2),
+(@p_swap, 1, '-5 5', '5 -5', 3);
+
+-- ---------------------------------------------------------------------------
+-- C++ — max of three, vector average, Rectangle class
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_cpp, NULL, 'max-of-three', 'তিনটির মধ্যে সর্বোচ্চ', 'Max of Three',
+'তিনটি পূর্ণসংখ্যা ইনপুট নিন (স্পেস দিয়ে আলাদা)। সবচেয়ে বড় সংখ্যাটি প্রিন্ট করুন।',
+'#include <iostream>
+using namespace std;
+
+int main() {
+    int a, b, c;
+    cin >> a >> b >> c;
+    // TODO: সবচেয়ে বড় সংখ্যাটি প্রিন্ট করুন
+    return 0;
+}',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_max3 FROM problems WHERE slug = 'max-of-three';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_max3, 0, '3 7 5', '7', 1),
+(@p_max3, 0, '10 2 8', '10', 2),
+(@p_max3, 1, '-1 -5 -2', '-1', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_cpp, NULL, 'average-of-vector', 'ভেক্টরের গড়', 'Average of a Vector',
+'প্রথমে একটি পূর্ণসংখ্যা `n` ইনপুট নিন, তারপর `n`টি পূর্ণসংখ্যা। একটি `vector<int>`-এ সংখ্যাগুলো রাখুন এবং তাদের গড় (average) ঠিক দুই দশমিক ঘর পর্যন্ত প্রিন্ট করুন (যেমন `2.00`)।',
+'#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    int n;
+    cin >> n;
+    vector<int> nums(n);
+    for (int i = 0; i < n; i++) cin >> nums[i];
+    // TODO: গড় হিসাব করে দুই দশমিক ঘর পর্যন্ত প্রিন্ট করুন
+    return 0;
+}',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_vecavg FROM problems WHERE slug = 'average-of-vector';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_vecavg, 0, '3\n1 2 3', '2.00', 1),
+(@p_vecavg, 0, '4\n10 20 30 40', '25.00', 2),
+(@p_vecavg, 1, '2\n5 6', '5.50', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_cpp, NULL, 'rectangle-area-class', 'রেক্টাঙ্গেল ক্লাস', 'Rectangle Class',
+'একটি `Rectangle` ক্লাস বানান যাতে `width` ও `height` মেম্বার থাকে এবং একটি `area()` মেথড থাকে যা ক্ষেত্রফল রিটার্ন করে। দুটি সংখ্যা ইনপুট নিয়ে (width, height) ক্ষেত্রফল প্রিন্ট করুন।',
+'#include <iostream>
+using namespace std;
+
+class Rectangle {
+public:
+    int width, height;
+    int area() {
+        // TODO: ক্ষেত্রফল রিটার্ন করুন
+        return 0;
+    }
+};
+
+int main() {
+    Rectangle r;
+    cin >> r.width >> r.height;
+    cout << r.area();
+    return 0;
+}',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_rectcpp FROM problems WHERE slug = 'rectangle-area-class';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_rectcpp, 0, '4 5', '20', 1),
+(@p_rectcpp, 0, '10 3', '30', 2),
+(@p_rectcpp, 1, '7 6', '42', 3);
+
+-- ---------------------------------------------------------------------------
+-- Java — sum of digits, max in array, Rectangle class
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_java, NULL, 'sum-of-digits', 'অঙ্কের যোগফল', 'Sum of Digits',
+'একটি ধনাত্মক পূর্ণসংখ্যা ইনপুট নিন এবং তার অঙ্কগুলোর যোগফল প্রিন্ট করুন।',
+'import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        // TODO: n-এর অঙ্কগুলোর যোগফল বের করে প্রিন্ট করুন
+    }
+}',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_digitsum FROM problems WHERE slug = 'sum-of-digits';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_digitsum, 0, '123', '6', 1),
+(@p_digitsum, 0, '4567', '22', 2),
+(@p_digitsum, 1, '9', '9', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_java, NULL, 'find-max-in-array', 'অ্যারের সর্বোচ্চ মান খুঁজুন', 'Find Max in Array',
+'প্রথমে একটি পূর্ণসংখ্যা `n` ইনপুট নিন, তারপর `n`টি পূর্ণসংখ্যা। অ্যারের সর্বোচ্চ মানটি প্রিন্ট করুন।',
+'import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        int n = sc.nextInt();
+        int[] arr = new int[n];
+        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();
+        // TODO: সর্বোচ্চ মান বের করে প্রিন্ট করুন
+    }
+}',
+'easy', 20, 2000, 65536, 0);
+SELECT id INTO @p_maxjava FROM problems WHERE slug = 'find-max-in-array';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_maxjava, 0, '5\n3 7 2 9 4', '9', 1),
+(@p_maxjava, 0, '3\n-1 -5 -2', '-1', 2),
+(@p_maxjava, 1, '1\n42', '42', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_java, NULL, 'rectangle-area-oop', 'রেক্টাঙ্গেল ক্লাস (OOP)', 'Rectangle Class (OOP)',
+'একটি `Rectangle` ক্লাস বানান যাতে `width` ও `height` ফিল্ড থাকে এবং একটি `area()` মেথড থাকে যা ক্ষেত্রফল রিটার্ন করে। দুটি সংখ্যা ইনপুট নিয়ে ক্ষেত্রফল প্রিন্ট করুন।',
+'import java.util.Scanner;
+
+class Rectangle {
+    int width, height;
+    int area() {
+        // TODO: ক্ষেত্রফল রিটার্ন করুন
+        return 0;
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        Rectangle r = new Rectangle();
+        r.width = sc.nextInt();
+        r.height = sc.nextInt();
+        System.out.println(r.area());
+    }
+}',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_rectjava FROM problems WHERE slug = 'rectangle-area-oop';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_rectjava, 0, '4 5', '20', 1),
+(@p_rectjava, 0, '10 3', '30', 2),
+(@p_rectjava, 1, '7 6', '42', 3);
+
+-- ---------------------------------------------------------------------------
+-- Python — FizzBuzz, list max/min, word frequency
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_py, NULL, 'fizzbuzz', 'ফিজবাজ', 'FizzBuzz',
+'একটি পূর্ণসংখ্যা `n` ইনপুট নিন। 1 থেকে `n` পর্যন্ত প্রতিটি সংখ্যার জন্য আলাদা লাইনে প্রিন্ট করুন: 3 ও 5 দুটো দিয়েই বিভাজ্য হলে `FizzBuzz`, শুধু 3 দিয়ে বিভাজ্য হলে `Fizz`, শুধু 5 দিয়ে বিভাজ্য হলে `Buzz`, নাহলে সংখ্যাটি নিজেই।',
+'n = int(input())
+# TODO: FizzBuzz লজিক লিখুন',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_fizzbuzz FROM problems WHERE slug = 'fizzbuzz';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_fizzbuzz, 0, '5', '1\n2\nFizz\n4\nBuzz', 1),
+(@p_fizzbuzz, 0, '3', '1\n2\nFizz', 2),
+(@p_fizzbuzz, 1, '15', '1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_py, NULL, 'list-max-min', 'লিস্টের সর্বোচ্চ ও সর্বনিম্ন', 'List Max and Min',
+'একই লাইনে স্পেস দিয়ে আলাদা কিছু পূর্ণসংখ্যা ইনপুট নিন। সর্বোচ্চ ও সর্বনিম্ন মান একই লাইনে স্পেস দিয়ে প্রিন্ট করুন (আগে সর্বোচ্চ, পরে সর্বনিম্ন)।',
+'nums = list(map(int, input().split()))
+# TODO: সর্বোচ্চ ও সর্বনিম্ন প্রিন্ট করুন',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_listminmax FROM problems WHERE slug = 'list-max-min';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_listminmax, 0, '3 7 2 9 4', '9 2', 1),
+(@p_listminmax, 0, '-1 -5 -2', '-1 -5', 2),
+(@p_listminmax, 1, '42', '42 42', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_py, NULL, 'word-frequency', 'শব্দের ফ্রিকোয়েন্সি', 'Word Frequency',
+'একটি লাইন টেক্সট ইনপুট নিন (স্পেস দিয়ে আলাদা শব্দ)। সবচেয়ে বেশিবার আসা শব্দটি প্রিন্ট করুন। একাধিক শব্দের ফ্রিকোয়েন্সি সমান হলে, ইনপুটে যেটি প্রথমে এসেছে সেটি প্রিন্ট করুন।',
+'words = input().split()
+# TODO: dict ব্যবহার করে সবচেয়ে বেশিবার আসা শব্দটি বের করুন',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_wordfreq FROM problems WHERE slug = 'word-frequency';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_wordfreq, 0, 'the cat sat on the mat', 'the', 1),
+(@p_wordfreq, 0, 'a b a c b a', 'a', 2),
+(@p_wordfreq, 1, 'x y z', 'x', 3);
+
+-- ---------------------------------------------------------------------------
+-- JavaScript — array sum, count vowels, object total price
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_js, NULL, 'sum-of-array', 'অ্যারের যোগফল', 'Sum of an Array',
+'প্রথম লাইনে একটি পূর্ণসংখ্যা `n` ইনপুট নিন, দ্বিতীয় লাইনে `n`টি পূর্ণসংখ্যা (স্পেস দিয়ে আলাদা)। যোগফল প্রিন্ট করুন।',
+'const lines = [];
+require("readline").createInterface({ input: process.stdin }).on("line", (l) => {
+    lines.push(l);
+}).on("close", () => {
+    // TODO: lines[1] থেকে সংখ্যাগুলো পড়ে যোগফল প্রিন্ট করুন
+});',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_arrsum_js FROM problems WHERE slug = 'sum-of-array';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_arrsum_js, 0, '5\n1 2 3 4 5', '15', 1),
+(@p_arrsum_js, 0, '3\n-1 -2 -3', '-6', 2),
+(@p_arrsum_js, 1, '1\n100', '100', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_js, NULL, 'count-vowels', 'স্বরবর্ণ গণনা', 'Count Vowels',
+'একটি লাইন টেক্সট ইনপুট নিন এবং তাতে কতগুলো স্বরবর্ণ (a, e, i, o, u — ছোট/বড় হাতের নির্বিশেষে) আছে তা প্রিন্ট করুন।',
+'const readline = require("readline").createInterface({ input: process.stdin });
+readline.on("line", (line) => {
+    // TODO: স্বরবর্ণ গণনা করে প্রিন্ট করুন
+});',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_vowels FROM problems WHERE slug = 'count-vowels';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_vowels, 0, 'hello world', '3', 1),
+(@p_vowels, 0, 'JavaScript', '3', 2),
+(@p_vowels, 1, 'xyz', '0', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_js, NULL, 'object-total-price', 'অবজেক্টে মোট দাম', 'Object Total Price',
+'প্রথমে একটি পূর্ণসংখ্যা `n` ইনপুট নিন (আইটেম সংখ্যা), তারপর `n` লাইনে প্রতিটি আইটেমের `নাম দাম` (স্পেস দিয়ে আলাদা)। একটি অবজেক্টে আইটেমগুলো রেখে মোট দাম প্রিন্ট করুন।',
+'const lines = [];
+require("readline").createInterface({ input: process.stdin }).on("line", (l) => {
+    lines.push(l);
+}).on("close", () => {
+    // TODO: n ও প্রতিটি আইটেমের দাম পড়ে অবজেক্টে রেখে মোট দাম প্রিন্ট করুন
+});',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_objtotal FROM problems WHERE slug = 'object-total-price';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_objtotal, 0, '2\npen 10\nbook 50', '60', 1),
+(@p_objtotal, 0, '3\na 1\nb 2\nc 3', '6', 2),
+(@p_objtotal, 1, '1\nx 99', '99', 3);
+
+-- ---------------------------------------------------------------------------
+-- SQL — COUNT, GROUP BY, JOIN. Fixture DDL/DML lives inline in statement_md
+-- (same v1 convention as highest-salary above — see SubmissionService's own
+-- note on why there's no dedicated sql_fixture column yet). Each gets a
+-- second, hidden test case with the identical expected result — the
+-- fixture is fixed, so this isn't a different input, it's an anti-
+-- hardcoding recheck rather than a fresh case, same idea as a hidden
+-- re-run in a real judge.
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_sql, NULL, 'count-employees', 'কর্মীর সংখ্যা গণনা', 'Count Employees',
+'নিচের ফিক্সচার ডেটা ব্যবহার করে বলুন `employees` টেবিলে মোট কতজন কর্মী আছে।
+
+ফিক্সচার ডেটা:
+```sql
+CREATE TABLE employees (id INT, name VARCHAR(50), department VARCHAR(50));
+INSERT INTO employees VALUES (1,''Rima'',''Sales''),(2,''Kabir'',''IT''),(3,''Nusrat'',''IT''),(4,''Anik'',''Sales''),(5,''Tania'',''HR'');
+```',
+'-- আপনার SELECT কোয়েরি এখানে লিখুন
+',
+'easy', 15, 2000, 65536, 0);
+SELECT id INTO @p_countemp FROM problems WHERE slug = 'count-employees';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_countemp, 0, NULL, '5', 1),
+(@p_countemp, 1, NULL, '5', 2);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_sql, NULL, 'department-employee-count', 'ডিপার্টমেন্ট-ভিত্তিক কর্মী সংখ্যা', 'Employee Count per Department',
+'নিচের ফিক্সচার ডেটা ব্যবহার করে প্রতিটি department-এ কতজন কর্মী আছে তা বের করুন (`GROUP BY` ব্যবহার করে)। ফলাফল department-এর নাম অনুযায়ী ascending সাজিয়ে, প্রতি সারিতে `department,count` ফরম্যাটে দেখান।
+
+ফিক্সচার ডেটা:
+```sql
+CREATE TABLE employees (id INT, name VARCHAR(50), department VARCHAR(50));
+INSERT INTO employees VALUES (1,''Rima'',''Sales''),(2,''Kabir'',''IT''),(3,''Nusrat'',''IT''),(4,''Anik'',''Sales''),(5,''Tania'',''HR'');
+```',
+'-- আপনার SELECT কোয়েরি এখানে লিখুন
+',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_deptcount FROM problems WHERE slug = 'department-employee-count';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_deptcount, 0, NULL, 'HR,1\nIT,2\nSales,2', 1),
+(@p_deptcount, 1, NULL, 'HR,1\nIT,2\nSales,2', 2);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(@lang_sql, NULL, 'employee-department-join', 'কর্মী-ডিপার্টমেন্ট জয়েন', 'Employee-Department Join',
+'নিচের `employees` ও `departments` টেবিল থেকে **JOIN ব্যবহার করে** প্রতিটি কর্মীর নাম ও তার department-এর নাম বের করুন, কর্মীর নাম অনুযায়ী ascending সাজিয়ে, প্রতি সারিতে `name,department` ফরম্যাটে দেখান।
+
+ফিক্সচার ডেটা:
+```sql
+CREATE TABLE departments (id INT, name VARCHAR(50));
+INSERT INTO departments VALUES (1,''Sales''),(2,''IT''),(3,''HR'');
+CREATE TABLE employees (id INT, name VARCHAR(50), department_id INT);
+INSERT INTO employees VALUES (1,''Rima'',1),(2,''Kabir'',2),(3,''Nusrat'',2),(4,''Anik'',1),(5,''Tania'',3);
+```',
+'-- আপনার SELECT কোয়েরি এখানে লিখুন
+',
+'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_empjoin FROM problems WHERE slug = 'employee-department-join';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_empjoin, 0, NULL, 'Anik,Sales\nKabir,IT\nNusrat,IT\nRima,Sales\nTania,HR', 1),
+(@p_empjoin, 1, NULL, 'Anik,Sales\nKabir,IT\nNusrat,IT\nRima,Sales\nTania,HR', 2);
+
+-- ---------------------------------------------------------------------------
+-- Data Structures (language-agnostic) — reverse array, balanced brackets,
+-- first duplicate
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(NULL, NULL, 'reverse-array', 'অ্যারে উল্টানো', 'Reverse an Array',
+'প্রথমে একটি পূর্ণসংখ্যা `n` ইনপুট নিন, তারপর `n`টি পূর্ণসংখ্যা। অ্যারেটি উল্টে (reverse করে) প্রিন্ট করুন (স্পেস দিয়ে আলাদা)। যেকোনো সমর্থিত ভাষায় সাবমিট করতে পারবেন।',
+NULL, 'easy', 20, 2000, 65536, 0);
+SELECT id INTO @p_revarr FROM problems WHERE slug = 'reverse-array';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_revarr, 0, '5\n1 2 3 4 5', '5 4 3 2 1', 1),
+(@p_revarr, 0, '3\n7 8 9', '9 8 7', 2),
+(@p_revarr, 1, '1\n42', '42', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(NULL, NULL, 'valid-parentheses', 'ব্যালান্সড ব্র্যাকেট', 'Valid Parentheses',
+'একটি স্ট্রিং ইনপুট নিন যাতে শুধু `(`, `)`, `{`, `}`, `[`, `]` ক্যারেক্টার আছে। ব্র্যাকেটগুলো সঠিকভাবে ম্যাচড (balanced ও সঠিক ক্রমে বন্ধ) হলে `Valid` প্রিন্ট করুন, না হলে `Invalid`। **স্ট্যাক ব্যবহার করে সমাধান করুন** — এই মডিউলের কোর কনসেপ্ট। যেকোনো সমর্থিত ভাষায় সাবমিট করতে পারবেন।',
+NULL, 'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_validparen FROM problems WHERE slug = 'valid-parentheses';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_validparen, 0, '()[]{}', 'Valid', 1),
+(@p_validparen, 0, '(]', 'Invalid', 2),
+(@p_validparen, 1, '{[()()]}', 'Valid', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(NULL, NULL, 'find-duplicate', 'প্রথম ডুপ্লিকেট খুঁজুন', 'Find the First Duplicate',
+'প্রথমে একটি পূর্ণসংখ্যা `n` ইনপুট নিন, তারপর `n`টি পূর্ণসংখ্যা। অ্যারেতে বাম থেকে ডানে স্ক্যান করে প্রথম যে সংখ্যাটি আগেই দেখা গেছে (duplicate) সেটি প্রিন্ট করুন। ডুপ্লিকেট না থাকলে `-1` প্রিন্ট করুন। **হ্যাশ টেবিল/সেট ব্যবহার করলে O(n) সময়ে সমাধান করা যায়।** যেকোনো সমর্থিত ভাষায় সাবমিট করতে পারবেন।',
+NULL, 'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_finddup FROM problems WHERE slug = 'find-duplicate';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_finddup, 0, '5\n1 2 3 2 4', '2', 1),
+(@p_finddup, 0, '4\n1 2 3 4', '-1', 2),
+(@p_finddup, 1, '6\n5 1 5 2 3 1', '5', 3);
+
+-- ---------------------------------------------------------------------------
+-- Algorithms (language-agnostic) — binary search, bubble sort, recursive
+-- Fibonacci
+-- ---------------------------------------------------------------------------
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(NULL, NULL, 'binary-search', 'বাইনারি সার্চ', 'Binary Search',
+'একটি সাজানো (sorted, ascending) অ্যারে ইনপুট নিন (প্রথমে `n`, তারপর `n`টি সংখ্যা), তারপর একটি টার্গেট মান `x`। **বাইনারি সার্চ ব্যবহার করে** `x`-এর ইনডেক্স (0-based) প্রিন্ট করুন, না পেলে `-1` প্রিন্ট করুন। যেকোনো সমর্থিত ভাষায় সাবমিট করতে পারবেন।',
+NULL, 'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_binsearch FROM problems WHERE slug = 'binary-search';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_binsearch, 0, '5\n1 3 5 7 9\n7', '3', 1),
+(@p_binsearch, 0, '4\n2 4 6 8\n5', '-1', 2),
+(@p_binsearch, 1, '1\n10\n10', '0', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(NULL, NULL, 'bubble-sort', 'বাবল সর্ট', 'Bubble Sort',
+'একটি অ্যারে ইনপুট নিন (প্রথমে `n`, তারপর `n`টি সংখ্যা)। **বাবল সর্ট ব্যবহার করে** অ্যারেটি ascending order-এ সাজিয়ে প্রিন্ট করুন (স্পেস দিয়ে আলাদা)। যেকোনো সমর্থিত ভাষায় সাবমিট করতে পারবেন।',
+NULL, 'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_bubblesort FROM problems WHERE slug = 'bubble-sort';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_bubblesort, 0, '5\n5 3 1 4 2', '1 2 3 4 5', 1),
+(@p_bubblesort, 0, '3\n9 8 7', '7 8 9', 2),
+(@p_bubblesort, 1, '1\n1', '1', 3);
+
+INSERT INTO problems (language_id, lesson_id, slug, title_bn, title_en, statement_md, starter_code, difficulty, xp_reward, time_limit_ms, memory_limit_kb, content_verified) VALUES
+(NULL, NULL, 'fibonacci-recursive', 'রিকার্সিভ ফিবোনাচ্চি', 'Recursive Fibonacci',
+'একটি নন-নেগেটিভ পূর্ণসংখ্যা `n` ইনপুট নিন এবং **রিকার্শন ব্যবহার করে** n-তম ফিবোনাচ্চি সংখ্যা প্রিন্ট করুন। ধরে নিন `fib(0) = 0`, `fib(1) = 1`। যেকোনো সমর্থিত ভাষায় সাবমিট করতে পারবেন।',
+NULL, 'medium', 25, 2000, 65536, 0);
+SELECT id INTO @p_fibrec FROM problems WHERE slug = 'fibonacci-recursive';
+INSERT INTO test_cases (problem_id, is_hidden, stdin, expected_stdout, sort_order) VALUES
+(@p_fibrec, 0, '6', '8', 1),
+(@p_fibrec, 0, '0', '0', 2),
+(@p_fibrec, 1, '10', '55', 3);
+
 -- ---------------------------------------------------------------------------
 -- Projects — portfolio-style capstones (self-reported, admin-reviewed;
 -- NOT auto-judged — see BUILD-SPEC §9 and 02-SCHEMA.sql migration 008).
 -- One per representative language for v1; more added via admin CRUD.
 -- ---------------------------------------------------------------------------
-INSERT INTO projects (language_id, slug, title_bn, title_en, brief_md, rubric_md, starter_repo_notes, xp_reward, content_verified) VALUES
-(@lang_js, 'todo-list-app', 'টুডু লিস্ট অ্যাপ', 'Todo List App',
+-- projects has no language_id column of its own as of migration 009 — a
+-- project's language(s) live in the project_languages junction table (see
+-- 003_hybrid_project.sql for the multi-language case), so each row here is
+-- linked via a follow-up INSERT INTO project_languages below, same pattern.
+INSERT INTO projects (slug, title_bn, title_en, brief_md, rubric_md, starter_repo_notes, xp_reward, content_verified) VALUES
+('todo-list-app', 'টুডু লিস্ট অ্যাপ', 'Todo List App',
 'একটি ব্রাউজার-বেসড Todo List অ্যাপ বানান: টাস্ক যোগ করা, সম্পন্ন হিসেবে মার্ক করা, এবং মুছে ফেলা যাবে। শুধু vanilla JavaScript (কোনো ফ্রেমওয়ার্ক ছাড়া) ব্যবহার করুন — এটা এই ট্র্যাকের Arrays ও Objects মডিউলের পর করার উপযুক্ত।',
 '- টাস্ক যোগ/মুছা/সম্পন্ন-মার্ক তিনটাই কাজ করে কিনা\n- কোড রিডেবল ও যৌক্তিকভাবে ফাংশনে ভাগ করা কিনা\n- কমপক্ষে একটি README থাকা, যেখানে কীভাবে রান করতে হয় লেখা আছে',
 'সাজেস্টেড ফাইল: index.html, style.css, app.js — কোনো বিল্ড স্টেপ দরকার নেই।',
 100, 0),
-(@lang_py, 'cli-calculator', 'কমান্ড-লাইন ক্যালকুলেটর', 'Command-Line Calculator',
+('cli-calculator', 'কমান্ড-লাইন ক্যালকুলেটর', 'Command-Line Calculator',
 'একটি কমান্ড-লাইন ক্যালকুলেটর বানান যা +, -, *, / সাপোর্ট করে এবং ইনভ্যালিড ইনপুট (যেমন শূন্য দিয়ে ভাগ) গ্রেসফুলি হ্যান্ডেল করে।',
 '- চারটি অপারেশনই সঠিকভাবে কাজ করে কিনা\n- শূন্য দিয়ে ভাগ ক্র্যাশ না করে এরর মেসেজ দেখায় কিনা\n- ইনপুট লুপ চলতে থাকে যতক্ষণ না ইউজার exit লেখে',
 'সাজেস্টেড ফাইল: calculator.py',
 80, 0),
-(@lang_c, 'student-grade-manager', 'স্টুডেন্ট গ্রেড ম্যানেজার', 'Student Grade Manager',
+('student-grade-manager', 'স্টুডেন্ট গ্রেড ম্যানেজার', 'Student Grade Manager',
 'একাধিক স্টুডেন্টের নাম ও নম্বর নিয়ে একটি প্রোগ্রাম বানান যা গড় (average), সর্বোচ্চ ও সর্বনিম্ন নম্বর বের করে দেখায়। অ্যারে ও ফাংশন ব্যবহার করুন।',
 '- একাধিক স্টুডেন্টের ডেটা সঠিকভাবে স্টোর ও প্রসেস হয় কিনা\n- গড়/সর্বোচ্চ/সর্বনিম্ন হিসাব সঠিক কিনা\n- কোড আলাদা ফাংশনে যৌক্তিকভাবে ভাগ করা কিনা',
 'সাজেস্টেড ফাইল: main.c',
 80, 0);
+
+SELECT id INTO @p_todo      FROM projects WHERE slug = 'todo-list-app';
+SELECT id INTO @p_calc      FROM projects WHERE slug = 'cli-calculator';
+SELECT id INTO @p_grademgr  FROM projects WHERE slug = 'student-grade-manager';
+
+INSERT INTO project_languages (project_id, language_id, is_primary) VALUES
+(@p_todo, @lang_js, 1),
+(@p_calc, @lang_py, 1),
+(@p_grademgr, @lang_c, 1);

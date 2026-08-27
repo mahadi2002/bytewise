@@ -11,20 +11,26 @@
     </p>
 </section>
 
-<section class="landing-cta">
-    <p class="cta-line">🚀 এখনই Start করুন — <?= e(price_line('full')) ?></p>
-    <p class="cta-sub">Robi &amp; Airtel Users Only&nbsp;&nbsp;|&nbsp;&nbsp;যেকোনো সময় Unsubscribe করুন</p>
-    <p class="cta-body">
-        একটা ভালো প্রোগ্রামিং কোর্স কিনতে হাজার হাজার টাকা লাগে। বাইটওয়াইজতে প্রতিদিন
-        মাত্র ৳2.78 (এক কাপ চায়ের দামের চেয়েও কম) দিয়ে পাবেন ৬টি ভাষার সম্পূর্ণ কোর্স,
-        ইন্টারঅ্যাকটিভ কুইজ, রিয়েল কোড এক্সিকিউশন এনভায়রনমেন্ট, এবং প্রতিদিনের নতুন
-        চ্যালেঞ্জ। XP অর্জন করুন, স্ট্রিক ধরে রাখুন, নিজের প্রোগ্রেস চোখে দেখুন — আর
-        প্রতিদিন একটু একটু করে প্রকৃত ডেভেলপার হয়ে উঠুন। যেকোনো সময় বন্ধ করে দিতে
-        পারবেন, কোনো লক-ইন নেই।
-    </p>
-    <a href="<?= e(url('/#subscribe')) ?>" class="btn btn-accent">Subscribe Now</a>
+<section class="landing-demo" aria-label="কোড লেসনের প্রিভিউ">
+    <p class="landing-demo-caption">ঠিক এভাবেই আপনার প্রথম লেসনে কোড লিখবেন —</p>
+    <pre class="code-sample landing-demo-code" data-demo-code><code>#include &lt;stdio.h&gt;
+
+int main() {
+    printf("আমি এখন কোড লিখছি!\n");
+    return 0;
+}</code><span class="landing-demo-cursor" aria-hidden="true"></span></pre>
+    <div class="landing-demo-output" data-demo-output>
+        <span class="landing-demo-output-prompt">$</span>আমি এখন কোড লিখছি!
+    </div>
 </section>
 
-<?= \App\Core\View::partial('partials/subscribe-box') ?>
-
-<?= \App\Core\View::partial('partials/billing-warning') ?>
+<section class="landing-cta">
+    <p class="cta-line">🚀 এখনই শুরু করুন — সম্পূর্ণ ফ্রি</p>
+    <p class="cta-body">
+        রেজিস্ট্রেশন করুন আর সাথে সাথে পেয়ে যান ৬টি ভাষার সম্পূর্ণ কোর্স,
+        ইন্টারঅ্যাকটিভ কুইজ, রিয়েল কোড এক্সিকিউশন এনভায়রনমেন্ট, এবং প্রতিদিনের নতুন
+        চ্যালেঞ্জ। XP অর্জন করুন, স্ট্রিক ধরে রাখুন, নিজের প্রোগ্রেস চোখে দেখুন — আর
+        প্রতিদিন একটু একটু করে প্রকৃত ডেভেলপার হয়ে উঠুন।
+    </p>
+    <a href="<?= e(url('/register')) ?>" class="btn btn-accent">Get Started</a>
+</section>

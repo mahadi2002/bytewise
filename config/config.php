@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 return [
     'app' => [
-        'name'        => 'Bytewise',
+        'name'        => env('APP_NAME', 'বাইটওয়াইজ'),
         'env'         => env('APP_ENV', 'production'),
         'debug'       => env('APP_ENV', 'production') === 'local',
         'key'         => base64_decode((string) env('APP_KEY', ''), true) ?: '',
@@ -18,7 +18,7 @@ return [
             'secure'          => (bool) env('SESSION_SECURE_COOKIE', true),
         ],
 
-        'otp_bypass_code' => env('OTP_BYPASS_CODE', ''),
+        'mail_from' => env('MAIL_FROM', 'no-reply@bytewise.example'),
     ],
 
     'db' => [
@@ -37,19 +37,7 @@ return [
     ],
 
     'gateways' => [
-        'subscription' => env('SUBSCRIPTION_GATEWAY', 'mock'),
-        'execution'    => env('EXECUTION_GATEWAY', 'mock'),
-    ],
-
-    'gateway' => [
-        // ৳2.78/day — locked price, see BUILD-SPEC §9 price_line() helper.
-        'daily_amount' => 2.78,
-        'shortcode'    => '16216',
-        'carrier' => [
-            'base_url'    => env('CARRIER_GATEWAY_BASE_URL', ''),
-            'api_key'     => env('CARRIER_GATEWAY_API_KEY', ''),
-            'merchant_id' => env('CARRIER_GATEWAY_MERCHANT_ID', ''),
-        ],
+        'execution' => env('EXECUTION_GATEWAY', 'mock'),
     ],
 
     'execution' => [
@@ -61,9 +49,9 @@ return [
     ],
 
     'rate_limits' => [
-        'otp_request'     => ['per_hour' => (int) env('RATE_LIMIT_OTP_REQUEST_PER_HOUR', 3), 'per_day' => (int) env('RATE_LIMIT_OTP_REQUEST_PER_DAY', 8)],
-        'otp_verify'      => ['per_15min' => (int) env('RATE_LIMIT_OTP_VERIFY_PER_15MIN', 5)],
-        'otp_resend'      => ['cooldown_seconds' => (int) env('RATE_LIMIT_OTP_RESEND_COOLDOWN_SECONDS', 60)],
+        'login'                  => ['per_15min' => (int) env('RATE_LIMIT_LOGIN_PER_15MIN', 5)],
+        'register'               => ['per_15min' => (int) env('RATE_LIMIT_REGISTER_PER_15MIN', 5)],
+        'password_reset_request' => ['per_hour' => (int) env('RATE_LIMIT_PASSWORD_RESET_PER_HOUR', 3)],
         'admin_login'     => ['per_15min' => (int) env('RATE_LIMIT_ADMIN_LOGIN_PER_15MIN', 5)],
         'contact_form'    => ['per_hour' => (int) env('RATE_LIMIT_CONTACT_FORM_PER_HOUR', 3)],
         'code_submit'     => ['per_hour' => (int) env('RATE_LIMIT_CODE_SUBMIT_PER_HOUR', 20), 'per_day' => (int) env('RATE_LIMIT_CODE_SUBMIT_PER_DAY', 100)],

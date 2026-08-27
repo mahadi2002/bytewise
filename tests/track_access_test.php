@@ -4,7 +4,9 @@ declare(strict_types=1);
 /**
  * Verifies TrackAccessService's current rule: every track is open to any
  * logged-in user, no prerequisites (product decision reversed the earlier
- * hard-gated chain — see FEATURES.md "Learning path & track gating").
+ * hard-gated chain — see FEATURES.md "Learning path & track gating"). The
+ * service no longer takes a language id at all — unlocked is purely a
+ * function of whether a user is logged in.
  *
  *   php tests/track_access_test.php
  */
@@ -26,25 +28,14 @@ function check(string $label, bool $actual, bool $expected, array &$failures): v
     }
 }
 
-$langC   = (int) Db::value("SELECT id FROM languages WHERE slug = 'c'");
-$langCpp = (int) Db::value("SELECT id FROM languages WHERE slug = 'cpp'");
-$langJava = (int) Db::value("SELECT id FROM languages WHERE slug = 'java'");
-$langDs  = (int) Db::value("SELECT id FROM languages WHERE slug = 'data-structures'");
-
 // Fresh user with zero progress anywhere.
 $freshUserId = (int) Db::insert(
     "INSERT INTO users (mobile_encrypted, mobile_hash, operator, status) VALUES (?, ?, 'robi', 'active')",
     ['test-blob-' . uniqid(), 'test-hash-' . uniqid()]
 );
 
-check('C unlocked for a brand-new user', TrackAccessService::isUnlocked($langC, $freshUserId), true, $failures);
-check('C++ unlocked for a brand-new user (no prerequisite)', TrackAccessService::isUnlocked($langCpp, $freshUserId), true, $failures);
-check('Java unlocked for a brand-new user (no prerequisite)', TrackAccessService::isUnlocked($langJava, $freshUserId), true, $failures);
-check('Data Structures unlocked for a brand-new user (no prerequisite)', TrackAccessService::isUnlocked($langDs, $freshUserId), true, $failures);
-check('Visitor (null user) sees everything locked', TrackAccessService::isUnlocked($langC, null), false, $failures);
-
-$unknownLanguageId = (int) Db::value('SELECT COALESCE(MAX(id), 0) + 1000 FROM languages');
-check('Unknown language id is locked', TrackAccessService::isUnlocked($unknownLanguageId, $freshUserId), false, $failures);
+check('Every track unlocked for a brand-new user (no prerequisite)', TrackAccessService::isUnlocked($freshUserId), true, $failures);
+check('Visitor (null user) sees everything locked', TrackAccessService::isUnlocked(null), false, $failures);
 
 // Cleanup.
 Db::exec('DELETE FROM users WHERE id = ?', [$freshUserId]);

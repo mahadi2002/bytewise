@@ -24,9 +24,8 @@ final class CourseController extends Controller
         }
 
         $userId = $this->currentUserId();
-        $access = TrackAccessService::check((int) $language['id'], $userId);
-        if (!$access['unlocked']) {
-            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
+        if (!TrackAccessService::isUnlocked($userId)) {
+            Session::notify('info', 'This track is not available right now.');
             return $this->redirect(url('/dashboard'));
         }
 
@@ -55,9 +54,8 @@ final class CourseController extends Controller
         }
 
         $userId = $this->currentUserId();
-        $access = TrackAccessService::check((int) $language['id'], $userId);
-        if (!$access['unlocked']) {
-            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
+        if (!TrackAccessService::isUnlocked($userId)) {
+            Session::notify('info', 'This track is not available right now.');
             return $this->redirect(url('/dashboard'));
         }
 

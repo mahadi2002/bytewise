@@ -40,7 +40,7 @@ final class SubmissionController extends Controller
         // Defense in depth — ProblemController already blocks reaching the
         // form for a locked track, but a direct POST (bookmarked, replayed)
         // must be rejected here too, not just at the GET.
-        if (!TrackAccessService::checkProblem($problem, $userId)['unlocked']) {
+        if (!TrackAccessService::isUnlocked($userId)) {
             throw new HttpException(403, 'এই ট্র্যাকটি এখনো লক করা আছে।');
         }
 

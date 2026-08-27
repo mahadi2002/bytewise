@@ -26,19 +26,21 @@ final class ProjectController extends Controller
         foreach ($projects as $p) {
             $eligibility[$p['id']] = ProjectEligibilityService::check((int) $p['id'], $userId)['ready'];
         }
+        $statuses = (new ProjectSubmissionRepository())->latestStatusesForUser($userId);
 
         return $this->view('projects/index', [
             'title'    => 'প্রজেক্ট',
             'projects' => $projects,
             'languagesByProject' => $languagesByProject,
             'eligibility' => $eligibility,
+            'statuses' => $statuses,
         ]);
     }
 
     public function show(Request $request, string $id): Response
     {
         $repo    = new ProjectRepository();
-        $project = $repo->findForViewer((int) $id, $this->isSubscribed());
+        $project = $repo->findForViewer((int) $id, $this->isAuthenticated());
         if ($project === null || !array_key_exists('brief_md', $project)) {
             $this->notFound();
         }

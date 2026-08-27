@@ -29,6 +29,27 @@ final class ProjectSubmissionRepository
         );
     }
 
+    /** @return array<int,string> project_id => review_status, this user's latest submission per project */
+    public function latestStatusesForUser(int $userId): array
+    {
+        // MySQL has no DISTINCT ON — join back to the max id per project_id
+        // to get the same "latest row per group" result.
+        $rows = Db::all(
+            'SELECT ps.project_id, ps.review_status
+               FROM project_submissions ps
+               JOIN (
+                   SELECT project_id, MAX(id) AS max_id
+                     FROM project_submissions
+                    WHERE user_id = ?
+                    GROUP BY project_id
+               ) latest ON latest.project_id = ps.project_id AND latest.max_id = ps.id
+              WHERE ps.user_id = ?',
+            [$userId, $userId]
+        );
+
+        return array_column($rows, 'review_status', 'project_id');
+    }
+
     public function pendingQueue(): array
     {
         return Db::all(

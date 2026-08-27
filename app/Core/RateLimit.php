@@ -15,10 +15,9 @@ final class RateLimit
     {
         $c = (array) config('rate_limits', []);
         return [
-            'otp_request'      => ['limit' => (int) ($c['otp_request']['per_hour'] ?? 3), 'window' => 3600],
-            'otp_request_day'  => ['limit' => (int) ($c['otp_request']['per_day'] ?? 8), 'window' => 86400],
-            'otp_verify'       => ['limit' => (int) ($c['otp_verify']['per_15min'] ?? 5), 'window' => 900],
-            'otp_resend'       => ['limit' => 1, 'window' => (int) ($c['otp_resend']['cooldown_seconds'] ?? 60)],
+            'login'                  => ['limit' => (int) ($c['login']['per_15min'] ?? 5), 'window' => 900],
+            'register'               => ['limit' => (int) ($c['register']['per_15min'] ?? 5), 'window' => 900],
+            'password_reset_request' => ['limit' => (int) ($c['password_reset_request']['per_hour'] ?? 3), 'window' => 3600],
             'admin_login'      => ['limit' => (int) ($c['admin_login']['per_15min'] ?? 5), 'window' => 900],
             'contact_form'     => ['limit' => (int) ($c['contact_form']['per_hour'] ?? 3), 'window' => 3600],
             'code_submit'      => ['limit' => (int) ($c['code_submit']['per_hour'] ?? 20), 'window' => 3600],

@@ -18,6 +18,17 @@
         </div>
     </div>
 
+    <?php if (!empty($continueLesson)): ?>
+    <section class="continue-lesson-card">
+        <div class="continue-lesson-info">
+            <span class="continue-lesson-label">যেখানে রেখেছিলেন সেখান থেকে চালিয়ে যান</span>
+            <strong class="continue-lesson-title"><?= e($continueLesson['lesson_title']) ?></strong>
+            <span class="hint"><?= e($continueLesson['language_name']) ?> · <?= e($continueLesson['module_title']) ?></span>
+        </div>
+        <a href="<?= e(url('/lessons/' . $continueLesson['lesson_id'])) ?>" class="btn btn-accent">চালিয়ে যান →</a>
+    </section>
+    <?php endif; ?>
+
     <?php if (!empty($daily)): ?>
     <section class="daily-challenge-strip">
         <h2>আজকের চ্যালেঞ্জ</h2>
@@ -34,16 +45,17 @@
 
     <h2>আমার স্কিল ট্রি</h2>
     <p class="hint">সব ভাষা ও প্রতিটি মডিউল যেকোনো সময় শুরু করা যায় — কোনো প্রি-রিকুইজিট নেই। যেখান থেকে ইচ্ছা সেখান থেকে শিখুন।</p>
+    <ul class="skill-legend">
+        <li><span class="skill-legend-dot is-complete">✓</span>সম্পন্ন</li>
+        <li><span class="skill-legend-dot is-partial">%</span>চলছে</li>
+        <li><span class="skill-legend-dot">0%</span>শুরু হয়নি</li>
+        <li><span class="skill-legend-dot">🔒</span>লক করা</li>
+    </ul>
     <div class="dashboard-trees">
         <?php foreach ($trees as $t): ?>
-            <div class="dashboard-tree-card <?= $t['unlocked'] ? '' : 'is-track-locked' ?>">
-                <?php if ($t['unlocked']): ?>
-                    <?= \App\Core\View::partial('partials/skill-tree', ['tree' => $t['tree'], 'language' => $t['language']]) ?>
-                    <a href="<?= e(url('/courses/' . $t['language']['slug'])) ?>" class="btn btn-link">ট্র্যাক দেখুন →</a>
-                <?php else: ?>
-                    <p class="skill-tree-track"><?= e($t['language']['name_bn']) ?></p>
-                    <p class="track-lock-note">🔒 <?= e(\App\Services\TrackAccessService::lockMessage($t['reason'])) ?></p>
-                <?php endif; ?>
+            <div class="dashboard-tree-card">
+                <?= \App\Core\View::partial('partials/skill-tree', ['tree' => $t['tree'], 'language' => $t['language']]) ?>
+                <a href="<?= e(url('/courses/' . $t['language']['slug'])) ?>" class="btn btn-link">ট্র্যাক দেখুন →</a>
             </div>
         <?php endforeach; ?>
     </div>

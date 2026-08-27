@@ -5,7 +5,14 @@
         <h2><?= e($lang['name_bn']) ?></h2>
         <ol>
             <?php foreach ($modulesByLanguage[$lang['id']] as $m): ?>
-                <li><?= e($m['title_bn']) ?> (<?= e($m['slug']) ?>)</li>
+                <li>
+                    <?= e($m['title_bn']) ?> (<?= e($m['slug']) ?>)
+                    <a href="<?= e(url('/admin/modules/' . $m['id'] . '/edit')) ?>">Edit</a>
+                    <form method="post" action="<?= e(url('/admin/modules/' . $m['id'] . '/delete')) ?>" class="inline-form" data-confirm="Delete this module? This cascades to every lesson in it.">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="btn btn-link">Delete</button>
+                    </form>
+                </li>
             <?php endforeach; ?>
         </ol>
     <?php endforeach; ?>

@@ -8,6 +8,7 @@ use App\Core\Db;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
+use App\Repositories\DiscussionPostRepository;
 use App\Repositories\LanguageRepository;
 use App\Repositories\ProblemRepository;
 use App\Services\TrackAccessService;
@@ -25,14 +26,13 @@ final class ProblemController extends Controller
      */
     public function show(Request $request, string $id): Response
     {
-        $problem = (new ProblemRepository())->findForViewer((int) $id, $this->isSubscribed());
+        $problem = (new ProblemRepository())->findForViewer((int) $id, $this->isAuthenticated());
         if ($problem === null || !array_key_exists('statement_md', $problem)) {
             $this->notFound();
         }
 
-        $access = TrackAccessService::checkProblem($problem, $this->currentUserId());
-        if (!$access['unlocked']) {
-            Session::notify('info', TrackAccessService::lockMessage($access['reason']));
+        if (!TrackAccessService::isUnlocked($this->currentUserId())) {
+            Session::notify('info', 'This track is not available right now.');
             return $this->redirect(url('/dashboard'));
         }
 
@@ -40,12 +40,16 @@ final class ProblemController extends Controller
         $language   = $isAgnostic ? null : (new LanguageRepository())->find((int) $problem['language_id']);
         $pickableLanguages = $isAgnostic ? $this->executableLanguages() : [];
 
+        $discussionCount = (new DiscussionPostRepository())->countForContext('problem', (int) $problem['id']);
+
         return $this->view('problems/show', [
             'title'              => $problem['title_bn'],
             'problem'            => $problem,
             'language'           => $language,
             'isAgnostic'         => $isAgnostic,
             'pickableLanguages'  => $pickableLanguages,
+            'discussionCount'    => $discussionCount,
+            'extraScripts'       => ['dist/editor.js'],
         ]);
     }
 

@@ -57,3 +57,9 @@ end-to-end tests against the real local DB, not just code review). Phase
 - [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
 - [TODO.md](TODO.md) — pre-launch blockers + phase-by-phase build progress
+
+## License
+
+MIT — see [LICENSE](LICENSE). Self-hosted fonts (Hind Siliguri, Inter,
+JetBrains Mono) are SIL OFL 1.1; see
+[`public/assets/fonts/FONT_LICENSE.md`](public/assets/fonts/FONT_LICENSE.md).

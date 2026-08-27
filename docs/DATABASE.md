@@ -47,10 +47,11 @@ storage/conversion layer in this app.
   and Algorithms (`is_meta_track=1`, `judge_language_code NULL`,
   `chk_languages_judge_code` CHECK enforces this pairing).
   **`prerequisite_language_id`/`requires_any_language`** (added in
-  migration 009) originally enforced the learning-path order — see that
-  migration's own notes below. **No longer read by any code** (product
-  decision reversed the hard-gate, all tracks are now prerequisite-free);
-  left in the schema rather than torn out via a migration for no benefit.
+  migration 009, dropped in migration 014) originally enforced the
+  learning-path order — see migration 009's and 014's own notes below.
+  Product decision reversed the hard-gate (all tracks are now
+  prerequisite-free) and, once confirmed unread by any code, the columns
+  were torn out rather than left as permanent dead schema.
 - **modules**, **lessons** — `lessons.body_md`/`code_sample` are the GATED
   columns: `LessonRepository::findForViewer()` must exclude them from the
   SELECT entirely for non-subscribers on non-free-preview lessons, not just
@@ -126,34 +127,42 @@ review found two real gaps: the schema couldn't represent a project
 needing more than one language, and nothing gated track content on
 prior-track completion despite the landing copy implying a learning order.
 **The prerequisite half was later explicitly reversed** — see the note
-below and FEATURES.md, "Learning path & track gating" — but the columns
-and this history are kept documented since the schema still carries them.
+below and FEATURES.md, "Learning path & track gating". The two columns
+this introduced were dropped outright in migration 014 once reversal was
+confirmed permanent and the columns confirmed unread; this history stays
+documented here even though the schema no longer carries them.
 
 - **project_languages** (`project_id`, `language_id`, `is_primary`) — a
   many-to-many replacing the single `projects.language_id` FK. A project
   can now require more than one language ("hybrid" — e.g. Python + Data
   Structures). `is_primary` only drives card display order, never a
   gating distinction; `ProjectEligibilityService` requires ALL listed
-  languages at 100% complete before the submission form unlocks.
-- **languages.prerequisite_language_id** (self-FK) — originally enforced
-  C → C++ → Java → Python → JavaScript → SQL: each of the last 5 requires
-  the previous 100% complete. This was a **pedagogical** ordering decision,
-  not a technical dependency (nothing about Python requires C).
-- **languages.requires_any_language** — originally set on Data Structures
-  and Algorithms: their content required ANY ONE real language track 100%
-  complete.
+  languages at 100% complete before the submission form unlocks. Still
+  active — unrelated to the prerequisite reversal below.
+- **languages.prerequisite_language_id** (self-FK, dropped in migration
+  014) — originally enforced C → C++ → Java → Python → JavaScript → SQL:
+  each of the last 5 requires the previous 100% complete. This was a
+  **pedagogical** ordering decision, not a technical dependency (nothing
+  about Python requires C).
+- **languages.requires_any_language** (dropped in migration 014) —
+  originally set on Data Structures and Algorithms: their content required
+  ANY ONE real language track 100% complete.
 - **Reversed (product decision):** every track and every module is now
   freely reachable to any logged-in subscriber, no prerequisites.
-  `TrackAccessService::check()` always returns `unlocked: true` for a
-  logged-in user and no longer reads either column;
-  `SkillTreeService::build()` no longer sequentially locks modules within
-  a track either. `CourseController`, `LessonController`,
-  `ProblemController`, and `SubmissionController` still delegate to
-  `TrackAccessService` (still the one place the rule is defined), it just
-  never says no to a logged-in user anymore.
+  `TrackAccessService::isUnlocked()` always returns `true` for a
+  logged-in user and no longer reads either column — migration 014
+  dropped both, along with the FK and its supporting index, once that was
+  confirmed safe; `SkillTreeService::build()` no longer sequentially locks
+  modules within a track either. `CourseController`, `LessonController`,
+  `ProblemController`, `SubmissionController`, `ExploreController`, and
+  `DashboardController` still delegate to `TrackAccessService` (still the
+  one place the rule is defined), it just never says no to a logged-in
+  user anymore.
 
 ## Seed content scope
-`database/seeds/content.sql` (from `02-SCHEMA-SEED.sql`) is a **structural
+`database/seeds/001_content.sql` (from `02-SCHEMA-SEED.sql`; numbered `001`
+so it sorts — and loads — before every other seed file, since it's the one
+that actually inserts the `languages` rows the rest depend on) is a **structural
 starting point, not a complete curriculum** — see that file's own scope note
 and `TODO.md` BLOCKER-5. Every row it inserts sets `content_verified = 0`.
 

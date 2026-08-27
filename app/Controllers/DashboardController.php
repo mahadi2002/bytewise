@@ -8,9 +8,9 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Repositories\DailyChallengeRepository;
 use App\Repositories\LanguageRepository;
+use App\Repositories\UserLessonProgressRepository;
 use App\Services\SkillTreeService;
 use App\Services\StreakService;
-use App\Services\TrackAccessService;
 use App\Services\XpService;
 
 /**
@@ -28,19 +28,11 @@ final class DashboardController extends Controller
         $languages = (new LanguageRepository())->all();
         $trees = [];
         foreach ($languages as $lang) {
-            $access = TrackAccessService::check((int) $lang['id'], $userId);
             $trees[] = [
                 'language' => $lang,
                 'tree'     => SkillTreeService::build((int) $lang['id'], $userId),
-                'unlocked' => $access['unlocked'],
-                'reason'   => $access['reason'],
             ];
         }
-
-        // Unlocked (actionable) tracks first, so "what's next" isn't buried
-        // after 6 locked cards — matches how freeCodeCamp/Odin surface the
-        // current step rather than a flat alphabetical/id list.
-        usort($trees, static fn(array $a, array $b): int => (int) $b['unlocked'] <=> (int) $a['unlocked']);
 
         $today = date('Y-m-d');
         $dcRepo = new DailyChallengeRepository();
@@ -52,12 +44,15 @@ final class DashboardController extends Controller
             }
         }
 
+        $continueLesson = (new UserLessonProgressRepository())->mostRecentIncomplete($userId);
+
         return $this->view('dashboard/index', [
-            'title'    => 'ড্যাশবোর্ড',
-            'trees'    => $trees,
-            'xpTotal'  => XpService::total($userId),
-            'streak'   => StreakService::current($userId),
-            'daily'    => $dailyChallenges,
+            'title'          => 'ড্যাশবোর্ড',
+            'trees'          => $trees,
+            'xpTotal'        => XpService::total($userId),
+            'streak'         => StreakService::current($userId),
+            'daily'          => $dailyChallenges,
+            'continueLesson' => $continueLesson,
         ]);
     }
 }

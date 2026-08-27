@@ -27,13 +27,13 @@ project needing more than one language at all. Two product decisions
 
 **This was later explicitly reversed** — product decision: every track
 and every module within a track is now freely reachable to any logged-in
-subscriber, no prerequisites at all. `TrackAccessService::check()` always
-returns `unlocked: true` for a logged-in user; `SkillTreeService::build()`
+subscriber, no prerequisites at all. `TrackAccessService::isUnlocked()`
+always returns `true` for a logged-in user; `SkillTreeService::build()`
 no longer sequentially locks modules within a track. The schema columns
-(`languages.prerequisite_language_id`, `languages.requires_any_language`)
-still exist but are no longer read by any code — removing them would be a
-migration + FK teardown for no behavioral benefit, so they're left in
-place, inert.
+this introduced (`languages.prerequisite_language_id`,
+`languages.requires_any_language`) were confirmed unread by any code and
+dropped in migration 014, rather than left in place as permanent inert
+schema.
 
 Still in effect, unaffected by the reversal:
 - **Hybrid projects**: `project_languages` (many-to-many) replaces the old

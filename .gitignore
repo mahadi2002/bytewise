@@ -15,3 +15,8 @@ Thumbs.db
 *.swp
 .idea/
 .vscode/
+
+# Vite build tooling — reproducible via `npm install`. public/assets/dist/
+# (the actual build OUTPUT) is intentionally NOT ignored: it's committed so
+# a plain deploy never needs npm install (see package.json).
+node_modules/

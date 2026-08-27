@@ -19,7 +19,8 @@
         <div class="nav-links">
             <a href="<?= e(url('/explore')) ?>">এক্সপ্লোর</a>
             <a href="<?= e(url('/placement-test')) ?>">প্লেসমেন্ট টেস্ট</a>
-            <a class="btn btn-price" href="<?= e(url('/#subscribe')) ?>"><?= e(price_line('short')) ?></a>
+            <a href="<?= e(url('/login')) ?>">লগইন</a>
+            <a class="btn btn-accent" href="<?= e(url('/register')) ?>">শুরু করুন</a>
         </div>
     <?php endif; ?>
 </nav>

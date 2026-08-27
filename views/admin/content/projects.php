@@ -2,7 +2,7 @@
 <section>
     <h1>Projects</h1>
     <table class="admin-table">
-        <thead><tr><th>ID</th><th>Slug</th><th>Title</th><th>Languages</th></tr></thead>
+        <thead><tr><th>ID</th><th>Slug</th><th>Title</th><th>Languages</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($projects as $p): ?>
             <tr>
@@ -10,6 +10,13 @@
                 <td><?= e($p['slug']) ?></td>
                 <td><?= e($p['title_bn']) ?></td>
                 <td><?= e(implode(' + ', array_map(static fn(array $l): string => $l['name_bn'], $languagesByProject[$p['id']] ?? []))) ?></td>
+                <td>
+                    <a href="<?= e(url('/admin/content/projects/' . $p['id'] . '/edit')) ?>">Edit</a>
+                    <form method="post" action="<?= e(url('/admin/content/projects/' . $p['id'] . '/delete')) ?>" class="inline-form" data-confirm="Delete this project? This cascades to every student submission for it.">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="btn btn-link">Delete</button>
+                    </form>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>

@@ -18,6 +18,15 @@ final class DiscussionPostRepository
         );
     }
 
+    /** Cheap count for a comment-count CTA on content pages — avoids fetching every post body just to show a number. */
+    public function countForContext(string $contextType, int $contextId): int
+    {
+        return (int) Db::value(
+            'SELECT COUNT(*) FROM discussion_posts WHERE context_type = ? AND context_id = ? AND is_hidden_by_admin = 0',
+            [$contextType, $contextId]
+        );
+    }
+
     public function create(int $userId, string $contextType, int $contextId, ?int $parentPostId, string $bodyMd): int
     {
         return Db::insert(

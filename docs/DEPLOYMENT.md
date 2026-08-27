@@ -36,10 +36,10 @@ per rulebook §2.
    GRANT ALL PRIVILEGES ON bytewise.* TO 'bytewise_migrate'@'localhost';
    FLUSH PRIVILEGES;
    ```
-5. `php database/migrate.php --seed` — creates the DB, runs all 8
-   migrations, and seeds every `database/seeds/*.sql` file (`content.sql`
+5. `php database/migrate.php --seed` — creates the DB, runs all
+   migrations, and seeds every `database/seeds/*.sql` file (`001_content.sql`
    AND `002_placement.sql` both run automatically; this is a one-time
-   operation — `content.sql`'s inserts are not idempotent, so `--seed`
+   operation — `001_content.sql`'s inserts are not idempotent, so `--seed`
    cannot be safely re-run against a DB that already has this data).
    Then create the first admin separately (deliberately NOT auto-run by
    `--seed` — see that script's own docblock for why):

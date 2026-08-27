@@ -20,7 +20,7 @@
         <label>XP Reward</label><input type="number" name="xp_reward" value="<?= e((string) ($lesson['xp_reward'] ?? 10)) ?>">
         <label><input type="checkbox" name="is_free_preview" value="1" <?= ($lesson['is_free_preview'] ?? 0) ? 'checked' : '' ?>> Free Preview</label>
         <label>Sort Order</label><input type="number" name="sort_order" value="<?= e((string) ($lesson['sort_order'] ?? 1)) ?>">
-        <label><input type="checkbox" name="is_published" value="1" checked> Published</label>
+        <label><input type="checkbox" name="is_published" value="1" <?= ($lesson === null || ($lesson['is_published'] ?? 1)) ? 'checked' : '' ?>> Published</label>
         <button type="submit" class="btn btn-accent">Save</button>
     </form>
 </section>

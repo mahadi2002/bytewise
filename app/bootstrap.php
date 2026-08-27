@@ -67,9 +67,6 @@ if ($env === 'production') {
     if ($isDebug) {
         $fatal('APP_DEBUG resolves true when APP_ENV=production — check config/config.php.');
     }
-    if (config('gateways.subscription') === 'mock') {
-        $fatal('SUBSCRIPTION_GATEWAY=mock is blocked when APP_ENV=production.');
-    }
     if (config('gateways.execution') === 'mock') {
         $fatal('EXECUTION_GATEWAY=mock is blocked when APP_ENV=production.');
     }
@@ -125,5 +122,3 @@ register_shutdown_function(static function (): void {
 
 // ── Values every view can rely on ──────────────────────────────────────
 App\Core\View::share('appName', (string) config('app.name'));
-App\Core\View::share('dailyAmount', number_format((float) config('gateway.daily_amount', 2.78), 2));
-App\Core\View::share('shortcode', (string) config('gateway.shortcode', '16216'));

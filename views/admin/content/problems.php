@@ -2,7 +2,7 @@
 <section>
     <h1>Problems</h1>
     <table class="admin-table">
-        <thead><tr><th>ID</th><th>Track</th><th>Title</th><th>Difficulty</th><th>Published</th></tr></thead>
+        <thead><tr><th>ID</th><th>Track</th><th>Title</th><th>Difficulty</th><th>Published</th><th></th></tr></thead>
         <tbody>
         <?php foreach ($problems as $p): ?>
             <tr>
@@ -11,6 +11,13 @@
                 <td><?= e($p['title_bn']) ?> (<?= e($p['slug']) ?>)</td>
                 <td><?= e($p['difficulty']) ?></td>
                 <td><?= $p['is_published'] ? 'Yes' : 'No' ?></td>
+                <td>
+                    <a href="<?= e(url('/admin/content/problems/' . $p['id'] . '/edit')) ?>">Edit</a>
+                    <form method="post" action="<?= e(url('/admin/content/problems/' . $p['id'] . '/delete')) ?>" class="inline-form" data-confirm="Delete this problem?">
+                        <?= csrf_field() ?>
+                        <button type="submit" class="btn btn-link">Delete</button>
+                    </form>
+                </td>
             </tr>
         <?php endforeach; ?>
         </tbody>

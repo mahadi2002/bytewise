@@ -51,13 +51,14 @@ abstract class Controller
     }
 
     /**
-     * True when the viewer holds an active subscription right now. Always
-     * re-read from the DB — never from a session flag, per BUILD-SPEC §8's
-     * edge-case matrix ("Subscription lapses mid-session").
+     * True when a student is logged in. This app has no subscription tier
+     * any more — login is the only access gate, so "authenticated" is now
+     * the single signal every previously-subscription-gated call site
+     * checks (this used to be isSubscribed(), re-reading a DB-backed
+     * subscription state; that state no longer exists).
      */
-    protected function isSubscribed(): bool
+    protected function isAuthenticated(): bool
     {
-        $userId = Session::userId();
-        return $userId !== null && \App\Services\SubscriptionService::hasAccess($userId);
+        return Session::userId() !== null;
     }
 }

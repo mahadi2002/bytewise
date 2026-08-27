@@ -51,8 +51,8 @@ when a test session outlived the 120-minute window).
 ## Deliberate deviation from the sibling-app pattern
 
 Unlike prior apps in this series (which destroy the whole session on
-unsubscribe), `SubscriptionService::unsubscribe()` does NOT call
-`Session::revokeAllForUser()`. Bytewise has substantial free content
+unsubscribe), `SubscriptionService::unsubscribe()` does NOT kill the
+student's session(s). Bytewise has substantial free content
 (free-preview lessons, placement test, `/account` itself) a non-subscribed
 student must keep browsing, so forcing a full logout would be an unrelated
 side effect. The actual security guarantee (gated content stops being

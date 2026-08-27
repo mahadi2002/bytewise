@@ -33,4 +33,18 @@ final class ModuleRepository
             [$languageId, $slug, $titleBn, $titleEn, $sortOrder]
         );
     }
+
+    /** language_id/slug not editable here — same convention as LessonRepository::update() (fixed at create, moving a module to another track is a separate deliberate operation). */
+    public function update(int $id, string $titleBn, string $titleEn, int $sortOrder, bool $isPublished): void
+    {
+        Db::exec(
+            'UPDATE modules SET title_bn = ?, title_en = ?, sort_order = ?, is_published = ? WHERE id = ?',
+            [$titleBn, $titleEn, $sortOrder, $isPublished ? 1 : 0, $id]
+        );
+    }
+
+    public function delete(int $id): void
+    {
+        Db::exec('DELETE FROM modules WHERE id = ?', [$id]);
+    }
 }

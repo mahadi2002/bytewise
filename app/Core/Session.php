@@ -123,12 +123,6 @@ final class Session implements SessionHandlerInterface
         self::$started = false;
     }
 
-    /** Server-side revocation — used when a subscription lapses or on logout-everywhere. */
-    public static function revokeAllForUser(int $userId): void
-    {
-        Db::exec('DELETE FROM sessions WHERE user_id = ?', [$userId]);
-    }
-
     // ── SessionHandlerInterface ──────────────────────────────────────────
 
     public function open(string $path, string $name): bool

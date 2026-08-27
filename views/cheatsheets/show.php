@@ -11,8 +11,8 @@
             <div class="cheatsheet-full"><?= \App\Support\Markdown::toHtml($sheet['full_md']) ?></div>
         <?php else: ?>
             <div class="lesson-locked-card">
-                <p>🔒 সম্পূর্ণ চিট শিট দেখতে Subscribe করুন।</p>
-                <a href="<?= e(url('/#subscribe')) ?>" class="btn btn-accent">Subscribe করুন</a>
+                <p>🔒 সম্পূর্ণ চিট শিট দেখতে লগইন করুন।</p>
+                <a href="<?= e(url('/register')) ?>" class="btn btn-accent">রেজিস্ট্রেশন করুন</a>
             </div>
         <?php endif; ?>
     <?php endif; ?>

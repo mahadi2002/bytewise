@@ -17,11 +17,6 @@ final class Response
         return new self($body, $status, ['Content-Type' => 'text/html; charset=UTF-8']);
     }
 
-    public static function text(string $body, int $status = 200, string $type = 'text/plain'): self
-    {
-        return new self($body, $status, ['Content-Type' => $type . '; charset=UTF-8']);
-    }
-
     public static function json(array $data, int $status = 200): self
     {
         return new self(
@@ -34,11 +29,6 @@ final class Response
     public static function redirect(string $to, int $status = 302): self
     {
         return new self('', $status, ['Location' => $to]);
-    }
-
-    public static function empty(int $status = 204): self
-    {
-        return new self('', $status, []);
     }
 
     public function withHeader(string $name, string $value): self
