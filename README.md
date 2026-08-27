@@ -3,10 +3,10 @@
 An interactive, Bangla-first programming education platform for
 Bangladeshi beginners — structured tracks (C → C++ → Java → Python →
 JavaScript → SQL → Data Structures → Algorithms), inline quizzes, a skill
-tree, portfolio projects, and online code execution, gated behind a
-৳2.78/day BDApps micro-subscription for Robi & Airtel users. Fifth app in
-this workspace's series (after GardenBondhu, IELTS Master BD, PustiSathi,
-DinSathi) — same architecture, new domain.
+tree, portfolio projects, and online code execution, free to use behind a
+plain email + password login. Fifth app in this workspace's series (after
+GardenBondhu, IELTS Master BD, PustiSathi, DinSathi) — same architecture,
+new domain.
 
 ## Stack
 
@@ -20,11 +20,6 @@ DinSathi) — same architecture, new domain.
 - **Strict CSP**, zero `unsafe-inline` on scripts or styles.
 - **Self-hosted fonts**: Hind Siliguri, Inter, JetBrains Mono (all SIL OFL
   1.1) — see `public/assets/fonts/FONT_LICENSE.md`.
-
-This app's locked decisions and exact UI copy are in
-[`01-BUILD-SPEC.md`](01-BUILD-SPEC.md), [`02-SCHEMA.sql`](02-SCHEMA.sql),
-[`03-ENV-AND-CONFIG.md`](03-ENV-AND-CONFIG.md), and
-[`04-AI-BUILD-PLAYBOOK.md`](04-AI-BUILD-PLAYBOOK.md).
 
 ## Quick start
 

@@ -18,17 +18,11 @@ per rulebook §2.
      (`php -r "echo base64_encode(random_bytes(32)), PHP_EOL;"` — run
      twice, they must differ).
    - `SESSION_SECURE_COOKIE=true` (requires HTTPS).
-   - `SUBSCRIPTION_GATEWAY=carrier` + real `CARRIER_GATEWAY_*` values —
-     **blocked until BLOCKER-1 is resolved** (bootstrap.php refuses to boot
-     with `SUBSCRIPTION_GATEWAY=mock` under `APP_ENV=production`).
    - `EXECUTION_GATEWAY=remote_judge` + `REMOTE_JUDGE_BASE_URL` — **blocked
-     until BLOCKER-2 is resolved** (same fail-loud rule).
-   - `OTP_BYPASS_CODE` should stay unset or irrelevant in production — the
-     guard is `APP_ENV === 'local'`, not the value's presence, but leaving
-     it blank is one less thing to reason about.
+     until BLOCKER-2 is resolved** (`bootstrap.php` refuses to boot with
+     `EXECUTION_GATEWAY=mock` under `APP_ENV=production`, fail-loud).
 4. Create the two MySQL users (see `database/migrations/`'s privilege
-   setup in `03-ENV-AND-CONFIG.md` §7, or re-run the `CREATE USER`
-   statements from this session):
+   setup, or re-run the `CREATE USER` statements from this session):
    ```sql
    CREATE USER 'bytewise_app'@'localhost' IDENTIFIED BY '<strong-password>';
    GRANT SELECT, INSERT, UPDATE, DELETE ON bytewise.* TO 'bytewise_app'@'localhost';
@@ -54,16 +48,16 @@ per rulebook §2.
 
 ## What's still blocked pre-launch
 
-See `TODO.md` for the full list (BLOCKER-1 through BLOCKER-6). The two
-that block a real production cutover specifically:
+See `TODO.md` for the full list. The one that blocks a real production
+cutover specifically:
 
-- **BLOCKER-1**: real BDApps/SDP carrier gateway credentials — without
-  these, `SUBSCRIPTION_GATEWAY` cannot be set to `carrier` and the app
-  cannot boot under `APP_ENV=production` at all (by design, fail-loud).
 - **BLOCKER-2**: which service backs `RemoteJudgeGateway` — a hosting/cost
   decision. Until resolved, `EXECUTION_GATEWAY` must stay `mock`, which
   itself is blocked under `APP_ENV=production` — meaning code execution
   cannot go live in production until this is resolved, full stop.
+
+There is no billing/subscription gateway to configure — Bytewise is a
+free, login-only app; see `docs/ARCHITECTURE.md` "Access control".
 
 ## Font licensing
 

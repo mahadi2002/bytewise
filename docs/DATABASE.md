@@ -1,8 +1,11 @@
 # DATABASE.md — Bytewise
 
-Schema source of truth: `database/migrations/001..008_*.sql` (matches
-`02-SCHEMA.sql` from the build spec, split into the 8 numbered files below).
-Runtime connection uses the low-privilege `bytewise_app` user (SELECT/INSERT/
+Schema source of truth: `database/migrations/001..016_*.sql`. The first 8
+files below (`001`–`008`) were the initial build; migrations `009`–`016`
+are documented further down, in order, including the two most recent —
+`015_drop_subscription_billing.sql` and `016_email_password_auth.sql` —
+which removed the old carrier-subscription/OTP schema entirely. Runtime
+connection uses the low-privilege `bytewise_app` user (SELECT/INSERT/
 UPDATE/DELETE only); `database/migrate.php` uses the separate
 `bytewise_migrate` admin credential. DDL-denial verified via
 `tests/ddl_denial_probe.php` (exit 0, MySQL error 1142 CREATE denied).
@@ -14,32 +17,43 @@ so every `DATETIME`/`TIMESTAMP` column stores Dhaka wall-clock time directly
 storage/conversion layer in this app.
 
 ## 001_core_auth.sql
-- **users** — mobile number is never stored in plaintext: `mobile_encrypted`
-  (AES-256-GCM via `Core\Crypto::encrypt`) + `mobile_hash` (HMAC-SHA256 blind
-  index via `Core\Crypto::blindIndex`, keyed by `HASH_PEPPER` — separate from
-  `APP_KEY`) for lookups. `operator` is `robi`|`airtel` only.
-- **otp_requests** — `otp_hash` is `password_hash()`, never plaintext. 5-min
-  TTL, attempt cap, `purpose` distinguishes `subscribe` vs `admin_2fa_recovery`.
+- **users** — originally phone+OTP: `mobile_encrypted` (AES-256-GCM) +
+  `mobile_hash` (HMAC-SHA256 blind index) for lookups, `operator`
+  `robi`|`airtel` only. **All three columns were dropped in migration 016**
+  (`016_email_password_auth.sql`), replaced with `email`/`password_hash` —
+  see that migration's own section below. This entry stays as a record of
+  what 001 originally shipped.
+- **otp_requests** — originally `otp_hash` (`password_hash()`, never
+  plaintext), 5-min TTL, attempt cap, `purpose` distinguishing `subscribe`
+  vs `admin_2fa_recovery`. **Dropped outright in migration 016** —
+  email+password auth has no OTP step, so nothing replaces this table.
 - **sessions** — DB-backed (`App\Core\Session`), one row can carry either
   `user_id` (student) or `admin_user_id` (admin), never both meaningfully at
-  once. Lapsed subscription revokes access on the next request because
-  `RequireSubscription` re-reads `subscriptions.status` from the DB every
-  time, never from session state.
+  once. There is no subscription state to re-check anymore — a logged-in
+  user has access to everything (see ARCHITECTURE.md "Access control").
 - **rate_limits** — fixed-window buckets keyed by `(bucket_key, action,
   window_started_at)`. See `App\Core\RateLimit::buckets()` for the action ->
   limit/window map (mirrors `config('rate_limits')`).
-- **admin_users** — separate auth path from students (password + TOTP 2FA,
-  no SMS OTP). `totp_secret_encrypted` uses the same `Crypto` class/`APP_KEY`.
+- **admin_users** — separate auth path from students (password + TOTP 2FA).
+  `totp_secret_encrypted` uses the same `Crypto` class/`APP_KEY`.
 
-## 002_subscription_billing.sql
-- **subscriptions** — state machine `pending -> active -> grace -> expired`,
-  plus `unsubscribed` reachable from any state. `gateway_external_ref` is the
-  opaque `SubscriptionGateway` reference, never a raw carrier identifier.
-- **billing_events** — append-only log of gateway events (`charge_success`,
-  `otp_confirmed`, `unsubscribed`, etc.), `amount_paisa` avoids float rounding.
-- **jobs** — cron task-guard table. `cron/run-jobs.php` checks
-  `UNIQUE(job_name, run_date)` before running a daily-or-slower job, so the
-  single crontab line can safely run every minute.
+## 002_subscription_billing.sql (dropped in migration 015)
+- **subscriptions** — originally a state machine `pending -> active ->
+  grace -> expired`, plus `unsubscribed` reachable from any state,
+  `gateway_external_ref` an opaque gateway reference.
+- **billing_events** — originally an append-only log of gateway events
+  (`charge_success`, `otp_confirmed`, `unsubscribed`, etc.), `amount_paisa`
+  to avoid float rounding.
+- Both tables, along with the `last_charged_at`/`next_charge_at` columns
+  migration 013 later added to `subscriptions`, **were dropped outright by
+  `015_drop_subscription_billing.sql`** — Bytewise is now a free,
+  login-only app with no billing or subscription tier of any kind. This
+  section stays as historical record of what the schema used to carry; see
+  the 015 section further down for the removal itself.
+- **jobs** — cron task-guard table, unaffected by the billing removal.
+  `cron/run-jobs.php` checks `UNIQUE(job_name, run_date)` before running a
+  daily-or-slower job, so the single crontab line can safely run every
+  minute.
 
 ## 003_content_catalog.sql
 - **languages** — doubles as the general "track" table: 6 real executable
@@ -110,8 +124,13 @@ rather than lesson-completed status, since the two are now independent.
 - **contact_messages** — real table-backed (per naming-honesty rule: the
   repository is genuinely `ContactMessageRepository`, not a log writer).
   `honeypot_tripped=1` rows are never actually inserted (BUILD-SPEC §8).
-- **audit_log** — every admin PII-reveal action (`user.pii_reveal`) and
-  billing/security-relevant admin action lands here.
+- **audit_log** — generic admin-action log table (`AuditLogRepository`),
+  viewable at `/admin/audit-log`. Originally recorded PII-reveal actions
+  from the old encrypted-mobile-number admin UI; that feature no longer
+  exists under email+password auth (email is stored in the clear, nothing
+  to reveal), so nothing currently writes to this table — it's dead
+  infrastructure kept for whichever future admin action needs an audit
+  trail next, not a currently-active log.
 
 ## 008_projects.sql
 - **projects**/**project_submissions** — portfolio capstones, deliberately
@@ -218,3 +237,36 @@ either, so completing one could push `done` past the published-only
 `total` and permanently block that module from ever showing 100% (no
 admin "un-complete" exists) — fixed by 404ing on an unpublished lesson in
 both actions before anything is written.
+
+## 015_drop_subscription_billing.sql
+
+Business-model change: Bytewise is now a free, login-only hobby app, no
+paid tier. `DROP TABLE IF EXISTS billing_events` then `subscriptions`
+(`billing_events` has an FK to `subscriptions`, so it drops first). This
+removes the state machine, the gateway event log, and the
+`last_charged_at`/`next_charge_at` columns migration 013 had added — none
+of it survives. See the 002 section above for what these tables used to
+contain.
+
+## 016_email_password_auth.sql
+
+Replaces phone+OTP auth with standard email+password — a rebrand to a
+free, login-or-registered-only hobby app with no carrier/SMS dependency at
+all. Pre-launch, so this is a straightforward destructive column swap, not
+a backfill:
+
+- `users`: drops `mobile_encrypted`, `mobile_hash` (and its unique index
+  `uq_users_mobile_hash`), `operator`; adds `email VARCHAR(191) NOT NULL`
+  + `password_hash VARCHAR(255) NOT NULL` with a new `uq_users_email`
+  unique key.
+- `otp_requests` is dropped entirely (see the 001 section above).
+- **`password_resets`** (new table) — single-use, short-lived (1-hour TTL),
+  hashed-at-rest reset tokens (`token_hash`, never the raw token — the same
+  "never store the secret itself" pattern `otp_requests.otp_hash` used to
+  follow). Issued by `AuthController::forgotPassword()`, consumed by
+  `resetPassword()`.
+
+`AuthController` now handles registration and login directly — plain
+`password_hash()`/`password_verify()`, no gateway, no OTP service, no
+subscription activation step. See `STARTING.md` and `docs/ROUTES.md` for
+the actual routes.

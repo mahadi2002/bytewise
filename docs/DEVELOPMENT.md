@@ -20,16 +20,14 @@
 ## Local-dev conveniences (all gated on `APP_ENV=local`, checked at the
 point of use, never on a debug flag alone)
 
-- **OTP bypass**: `OTP_BYPASS_CODE` (default `123456`) is accepted by
-  `OtpService::verify()` instead of the real generated code.
-- **Generated OTP codes** are logged to `storage/logs/otp-dev-codes-*.log`
-  (`...last4 => code`) so you don't need the bypass code if you want to
-  exercise the real hash-check path.
-- **MockSubscriptionGateway** always succeeds; **MockExecutionGateway**
-  never runs your code — put a line containing `// MOCK: fail` (or `#`/`--`
-  equivalents) anywhere in a submission's source to force a failing
-  verdict, otherwise every test case passes. See `MockExecutionGateway`'s
-  docblock.
+- **Password reset links** are also written to
+  `storage/logs/password-reset-dev-links-*.log` (`email => link`) since no
+  real mail transport is typically configured on a dev machine — see
+  `AuthController::issuePasswordReset()`.
+- **MockExecutionGateway** never runs your code — put a line containing
+  `// MOCK: fail` (or `#`/`--` equivalents) anywhere in a submission's
+  source to force a failing verdict, otherwise every test case passes. See
+  `MockExecutionGateway`'s docblock.
 
 ## Tests / verification scripts
 
@@ -39,8 +37,8 @@ dependency for one) — run each with `php tests/<name>.php`:
 | Script | Verifies |
 |---|---|
 | `tests/ddl_denial_probe.php` | Runtime DB user can't run DDL |
-| `tests/lesson_gating_column_test.php` | `body_md`/`code_sample` absent from a non-subscriber's SELECT |
-| `tests/otp_bypass_denied_production_test.php` | Bypass code rejected outside `APP_ENV=local` — needs a production-flavored `.env` swapped in first, see the script's own docblock |
+| `tests/lesson_gating_column_test.php` | `body_md`/`code_sample` absent from a logged-out viewer's SELECT |
+| `tests/track_access_test.php` | Direct-URL bypass attempts on locked lessons/problems correctly redirect |
 | `tests/utf8_storage_probe.php` | Diagnostic: Bangla text round-trips through `Db` correctly (used to rule out an app bug vs. a Windows/git-bash terminal encoding artifact during this build) |
 
 ## Known local-environment quirks (not app bugs)

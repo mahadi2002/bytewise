@@ -41,15 +41,20 @@ php tests/ddl_denial_probe.php
 
 | Role | Login | Credential |
 |---|---|---|
-| Admin | `/admin/login` | Whatever you passed to `create_admin.php` — plus the printed TOTP secret in an authenticator app |
-| Student | `/` subscribe box | Any `018XXXXXXXX` (Robi) or `016XXXXXXXX` (Airtel) number — OTP is logged, not really sent (see below) |
+| Admin | `/admin/login` | Whatever email/password you passed to `create_admin.php` — plus the printed TOTP secret, added to an authenticator app |
+| Student | `/register` | Any email + password (min 8 chars) — registration logs you straight in, no verification step |
 
-## Where the mock OTP actually goes
+## Auth flow
 
-`MockSubscriptionGateway` never calls a real network. The generated code is
-logged to `storage/logs/otp-dev-codes-YYYY-MM-DD.log` (`...last4 => code`).
-Under `APP_ENV=local` you can also just type `123456` (`OTP_BYPASS_CODE`)
-at the verify screen instead of reading the log.
+Both students and admins are plain email + password (`AuthController.php` /
+`Admin/AdminAuthController.php`) — no OTP, no phone number, no carrier
+subscription of any kind. `/register` creates a `users` row and logs you in
+immediately; `/login` checks the password hash. Admin login additionally
+requires a TOTP code from an authenticator app (see `create_admin.php`
+below). Password resets go through `/forgot-password` → emailed link; in
+`APP_ENV=local` (no real mail transport configured) the reset link is also
+written to `storage/logs/password-reset-dev-links-YYYY-MM-DD.log` instead of
+actually being emailed.
 
 ## Mock code execution
 

@@ -11,7 +11,7 @@ public/index.php (front controller)
   -> App\Core\Session::start()          (DB-backed sessions)
   -> App\Core\Router::dispatch()
        -> matches app/routes.php entry
-       -> runs middleware pipeline (auth -> sub -> admin -> csrf -> rl:*)
+       -> runs middleware pipeline (auth -> admin -> csrf)
        -> calls Controller@action
   -> App\Middleware\SecurityHeaders (global, wraps every response)
   -> Response::send()
@@ -26,20 +26,21 @@ only; Apache's `.htaccess` handles this natively in production.
 app/
   Controllers/        thin, one action = one method (Admin/ subdir for admin controllers)
   Repositories/        ONLY place raw SQL lives, one per aggregate
-  Services/            business logic (OtpService, SubscriptionService,
-                        SkillTreeService, XpService, StreakService,
-                        SubmissionService, PlacementService,
-                        ProjectReviewService)
-  Middleware/           auth, guest, csrf, rate-limit, subscription-gate,
-                         admin, security-headers
-  Gateways/              SubscriptionGateway/CarrierGateway/Mock,
-                         CodeExecutionGateway/RemoteJudgeGateway/Mock
+  Services/            business logic (SkillTreeService, XpService,
+                        StreakService, SubmissionService, PlacementService,
+                        ProjectReviewService, ProjectEligibilityService,
+                        TrackAccessService)
+  Middleware/           auth, admin, csrf (SecurityHeaders is applied
+                        globally, not via the routes array — see the
+                        request lifecycle above)
+  Gateways/             CodeExecutionGateway/RemoteJudgeGateway/Mock,
+                        switched by GatewayFactory via EXECUTION_GATEWAY
   Core/                  Router, Db, Session, Csrf, RateLimit, Crypto, Env,
                          Validator, View, Logger, Request, Response, Controller
-  Exceptions/            HttpException, GatewayException, OtpException
-  Support/               Operator (BTRC prefix map), Totp, Markdown
+  Exceptions/            HttpException
+  Support/               Totp, Markdown
 config/config.php         single config file, dot-path via config()
-database/                 migrations/ (8 numbered files), seeds/, migrate.php
+database/                 migrations/ (16 numbered files), seeds/, migrate.php
 cron/                     run-jobs.php (single poller) + _jobs/
 views/                    SIBLING of app/, plain-PHP templates + layouts
 public/                   web root — index.php, assets/
@@ -57,29 +58,27 @@ follows the same shape in its Repository:
   not merely hidden in the template. Verified concretely in
   `tests/lesson_gating_column_test.php`.
 
-## Subscription access control
+## Access control
 
-`RequireSubscription` middleware re-queries `SubscriptionService::hasAccess()`
-(a live DB read of `subscriptions.status IN ('active','grace')`) on every
-gated request — never a session-cached flag. A lapsed subscription loses
-access on its very next gated request. Session is intentionally NOT
-destroyed on unsubscribe (see `SubscriptionService::unsubscribe()` docblock)
-since Bytewise, unlike a zero-free-tier app, has substantial free content a
-non-subscribed student should keep browsing.
+There is no subscription tier — `RequireAuth` (`auth` middleware) is the
+only access gate on student-facing routes, and it's a plain session check
+(`Session::userId() !== null`), not a re-query of any billing state. Gated
+content (lessons/problems/projects/cheat sheets) still branches its SQL on
+whether the viewer is logged in at all — see "Content gating" above — but
+every logged-in user has access to everything; there's no active/grace/
+expired state to re-check on each request.
 
 ## Gateways
 
-Both external integrations follow interface + Mock + generic-named-stub:
+One external integration, following interface + Mock + generic-named-stub:
 
-- `SubscriptionGateway` — `MockSubscriptionGateway` (always succeeds, logs
-  to `storage/logs/otp-*.log`) / `CarrierGateway` (fails loud until
-  `CARRIER_GATEWAY_BASE_URL` is set — BLOCKER-1).
 - `CodeExecutionGateway` — `MockExecutionGateway` (never executes
   submitted code; file-backed simulated-async state under
   `storage/mock_executions/`, outcome controlled by a `// MOCK: fail`
   source marker) / `RemoteJudgeGateway` (fails loud until
   `REMOTE_JUDGE_BASE_URL` is set — BLOCKER-2, a hosting decision not yet
-  made, see TODO.md).
+  made, see TODO.md). Switched by `GatewayFactory` via the single
+  `EXECUTION_GATEWAY=mock|remote_judge` env var.
 
 ## Storage timezone
 
